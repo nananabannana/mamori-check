@@ -1,0 +1,636 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="個人情報流出への対策チェック、流出企業の検索、証券口座のセキュリティ設定をまとめたダッシュボード">
+<title>守りのチェックリスト</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+body{margin:0}img{max-width:100%}[hidden]{display:none!important}
+
+/* Layout: sticky progress bar + tabs (チェック / 流出企業 / 証券口座). Score panel over grouped checkable rows; breach search as filterable cards; broker picker with feature table + own checklist */
+:root{
+  --bg:#eef1f0; --surface:#ffffff; --ink:#14201d; --muted:#5d6b67; --line:#d6dddb;
+  --accent:#0f6b5c; --accent-soft:#dcefe9;
+  --danger:#c2412d; --danger-soft:#f8e3de; --warn:#b07806; --ok:#2f8a4f; --great:#0f6b5c;
+  --display:"Dela Gothic One","Hiragino Sans",sans-serif;
+  --body:"Zen Kaku Gothic New","Hiragino Sans","Noto Sans JP",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,monospace;
+  --lvl:var(--danger);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e1513; --surface:#16201d; --ink:#e4ece9; --muted:#93a39e; --line:#26332f;
+  --accent:#4fc3a8; --accent-soft:#183a32; --danger:#f07a63; --danger-soft:#3a1f1a;
+  --warn:#f0b54a; --ok:#6cc98a; --great:#4fc3a8; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e1513; --surface:#16201d; --ink:#e4ece9; --muted:#93a39e; --line:#26332f;
+  --accent:#4fc3a8; --accent-soft:#183a32; --danger:#f07a63; --danger-soft:#3a1f1a;
+  --warn:#f0b54a; --ok:#6cc98a; --great:#4fc3a8; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.65}
+a{color:var(--accent)}
+.wrap{max-width:860px;margin:0 auto;padding-inline:16px;padding-block:0 64px}
+
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:10px 0}
+.barrow{display:flex;align-items:center;gap:12px}
+.bar{flex:1;height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--lvl);transition:width .5s ease,background .5s}
+.pct{font-family:var(--mono);font-weight:700;font-size:13px;min-width:4ch;text-align:right;font-variant-numeric:tabular-nums}
+.tabs{display:flex;gap:4px;margin-top:10px;border-bottom:1px solid var(--line);overflow-x:auto}
+.tab{font:inherit;font-weight:700;font-size:14px;background:none;border:none;color:var(--muted);padding:8px 12px 10px;border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap}
+.tab[aria-selected="true"]{color:var(--ink);border-color:var(--ink)}
+.tab .badge{font-family:var(--mono);font-size:11px;background:var(--danger);color:var(--surface);border-radius:999px;padding:1px 6px;margin-left:4px}
+
+header{padding-block:18px 4px}
+.eyebrow{font-size:12px;letter-spacing:.14em;color:var(--muted);font-weight:700}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(28px,6vw,42px);line-height:1.2;margin:.2em 0 .3em;text-wrap:balance}
+h2.sec{font-family:var(--display);font-weight:400;font-size:24px;margin:24px 0 6px;text-wrap:balance}
+.lead{color:var(--muted);max-width:62ch;margin:0}
+
+.panel{margin-top:20px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px;display:grid;grid-template-columns:auto 1fr;gap:24px;align-items:center}
+@media (max-width:560px){.panel{grid-template-columns:1fr;justify-items:center;text-align:center}}
+.ring{position:relative;width:168px;height:168px}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring .track{fill:none;stroke:var(--line);stroke-width:14}
+.ring .val{fill:none;stroke:var(--lvl);stroke-width:14;stroke-linecap:round;transition:stroke-dashoffset .7s cubic-bezier(.2,.8,.2,1),stroke .5s}
+.ring .center{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
+.ring .num{font-family:var(--mono);font-weight:700;font-size:40px;line-height:1;font-variant-numeric:tabular-nums}
+.ring .num small{font-size:18px}
+.ring .cnt{font-size:12px;color:var(--muted);margin-top:4px;font-family:var(--mono)}
+.levelname{font-family:var(--display);font-size:24px;color:var(--lvl);transition:color .5s;margin:0}
+.levelmsg{color:var(--muted);margin:4px 0 14px}
+.ladder{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;max-width:360px;width:100%}
+.ladder div{font-size:11px;text-align:center;padding-top:8px;border-top:4px solid var(--line);color:var(--muted);transition:all .4s}
+.ladder div.on{border-color:var(--lvl);color:var(--ink);font-weight:700}
+.next{margin-top:16px;font-size:13px;background:var(--accent-soft);border-radius:8px;padding:10px 12px;text-align:left;width:100%;max-width:440px}
+.next b{color:var(--accent)}
+.sub{font-size:13px;color:var(--muted);margin-top:8px}
+
+.tools{display:flex;flex-wrap:wrap;gap:8px;margin-top:28px;align-items:center}
+.chip{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:6px 12px;border-radius:999px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chip:focus-visible,.tab:focus-visible,.item input:focus-visible+.box,.search:focus-visible,.use:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.spacer{flex:1}
+.reset{font:inherit;font-size:13px;background:none;border:none;color:var(--muted);text-decoration:underline;cursor:pointer}
+.confirm{display:flex;gap:8px;align-items:center;font-size:13px}
+.confirm button{font:inherit;font-size:13px;padding:4px 10px;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.confirm .yes{background:var(--danger);border-color:var(--danger);color:var(--surface)}
+
+section.cat{margin-top:28px}
+.cathead{display:flex;align-items:baseline;gap:12px;border-bottom:2px solid var(--ink);padding-bottom:6px}
+.cathead h3{font-family:var(--display);font-weight:400;font-size:19px;margin:0}
+.cathead .c{margin-left:auto;font-family:var(--mono);font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.cathead .c.full{color:var(--ok)}
+.list{list-style:none;margin:0;padding:0}
+.item{border-bottom:1px solid var(--line)}
+.item label{display:grid;grid-template-columns:28px 1fr auto;gap:12px;padding:14px 4px;cursor:pointer;align-items:start}
+.item input{position:absolute;opacity:0;pointer-events:none}
+.box{width:24px;height:24px;border:2px solid var(--muted);border-radius:6px;display:grid;place-content:center;margin-top:2px;transition:all .2s}
+.box svg{width:14px;height:14px;stroke:var(--surface);stroke-width:3;fill:none;opacity:0;transform:scale(.4);transition:all .2s}
+.item input:checked+.box{background:var(--ok);border-color:var(--ok)}
+.item input:checked+.box svg{opacity:1;transform:none}
+.t{font-weight:700}
+.item input:checked~.txt .t{color:var(--muted);text-decoration:line-through;text-decoration-thickness:1px}
+.how{font-size:13px;color:var(--muted);margin-top:2px}
+.pts{font-family:var(--mono);font-size:11px;padding:2px 7px;border-radius:4px;white-space:nowrap;margin-top:3px;border:1px solid var(--line);color:var(--muted)}
+.pts.hi{border-color:var(--danger);color:var(--danger)}
+.txt{min-width:0}
+
+/* breach search */
+.searchrow{display:flex;gap:8px;margin-top:18px;flex-wrap:wrap}
+.search{flex:1;min-width:0;font:inherit;font-size:16px;padding:12px 14px;border:2px solid var(--ink);border-radius:10px;background:var(--surface);color:var(--ink)}
+.meta{font-size:12px;color:var(--muted);margin-top:10px}
+.blist{display:grid;gap:10px;margin-top:14px}
+.bcard{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:grid;gap:6px}
+.bcard.mine{border-color:var(--danger);box-shadow:inset 4px 0 0 var(--danger)}
+.btop{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.bname{font-weight:700;font-size:16px}
+.bsvc{font-size:13px;color:var(--muted)}
+.bdate{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--muted)}
+.bcount{font-family:var(--mono);font-weight:700;font-size:14px;color:var(--danger);font-variant-numeric:tabular-nums}
+.bline{font-size:13px}
+.bline span{color:var(--muted)}
+.tags{display:flex;flex-wrap:wrap;gap:4px}
+.tag{font-size:11px;padding:1px 8px;border-radius:999px;background:var(--danger-soft);color:var(--danger);font-weight:700}
+.use{font:inherit;font-size:12px;justify-self:start;border:1px solid var(--line);background:none;color:var(--ink);border-radius:999px;padding:4px 12px;cursor:pointer}
+.bcard.mine .use{background:var(--danger);border-color:var(--danger);color:var(--surface)}
+.todo{display:none;background:var(--danger-soft);border-radius:8px;padding:10px 12px;font-size:13px}
+.bcard.mine .todo{display:block}
+.todo ul{margin:4px 0 0;padding-left:1.2em}
+.empty{padding:24px;text-align:center;color:var(--muted);background:var(--surface);border-radius:12px;border:1px dashed var(--line)}
+
+/* brokers */
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:16px}
+.fact{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.fact b{display:block;font-family:var(--mono);font-size:22px;line-height:1.2;font-variant-numeric:tabular-nums}
+.fact span{font-size:12px;color:var(--muted)}
+.callout{margin-top:14px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;font-size:14px}
+.callout h3{margin:0 0 6px;font-size:15px}
+.callout ol{margin:0;padding-left:1.3em}
+.brokers{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+.bk{font:inherit;font-weight:700;font-size:14px;border:2px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;padding:8px 14px;cursor:pointer;display:flex;gap:8px;align-items:center}
+.bk[aria-pressed="true"]{border-color:var(--ink)}
+.bk small{font-family:var(--mono);font-weight:500;color:var(--muted);font-size:12px}
+.bkhead{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:baseline;margin-top:22px}
+.bkhead h3{font-family:var(--display);font-weight:400;font-size:22px;margin:0}
+.bkhead .p{font-family:var(--mono);font-weight:700;color:var(--lvl2,var(--ok))}
+.minibar{height:8px;border-radius:4px;background:var(--line);overflow:hidden;margin-top:8px}
+.minibar i{display:block;height:100%;background:var(--ok);transition:width .5s}
+.tablewrap{overflow-x:auto;margin-top:14px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:13px;min-width:520px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;color:var(--muted);font-weight:700;letter-spacing:.04em}
+tr:last-child td{border-bottom:none}
+td.f{font-weight:700;white-space:nowrap}
+.st{font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;white-space:nowrap;border:1px solid currentColor}
+.st.req{color:var(--accent)}
+.st.set{color:var(--danger)}
+.st.auto{color:var(--muted)}
+.st.plan{color:var(--warn)}
+.note{font-size:12px;color:var(--muted);margin-top:10px}
+
+.srcl{display:inline-block;font-size:11px;font-weight:700;color:var(--accent);background:var(--accent-soft);border-radius:4px;padding:0 6px;margin-right:6px}
+.steps{margin:12px 0 0;padding-left:1.4em;display:grid;gap:8px;font-size:14px}
+.steps b{color:var(--danger)}
+footer{margin-top:40px;font-size:12px;color:var(--muted);display:grid;gap:6px}
+footer ul{margin:0;padding-left:1.2em}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+  <div class="topbar">
+    <div class="barrow" aria-hidden="true"><div class="bar"><i id="barFill"></i></div><span class="pct" id="barPct">0%</span></div>
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" id="tab-todo" aria-selected="false">やること<span class="badge" id="todoBadge" hidden></span></button>
+      <button class="tab" role="tab" id="tab-check" aria-selected="true">チェック</button>
+      <button class="tab" role="tab" id="tab-breach" aria-selected="false">流出企業<span class="badge" id="mineBadge" hidden></span></button>
+      <button class="tab" role="tab" id="tab-broker" aria-selected="false">証券口座</button>
+    </div>
+  </div>
+
+  <!-- ===== やること ===== -->
+  <div id="view-todo" hidden>
+    <h2 class="sec">やることリスト</h2>
+    <p class="lead">まだできていない対策を、効果の大きい順に並べています。基本チェック、選んだ証券会社の設定、「使っている」にした流出サービスへの対応をまとめて確認できます。終わったらチェックを入れてください。</p>
+    <div class="facts" id="todoFacts"></div>
+    <div id="todoList"></div>
+  </div>
+
+  <!-- ===== チェック ===== -->
+  <div id="view-check">
+    <header>
+      <div class="eyebrow">個人情報流出 対策まとめ</div>
+      <h1>守りのチェックリスト</h1>
+      <p class="lead">Xのスレッドに散らばっていた対策を、やるべき順にまとめました。できたものにチェックを入れると、あなたのセキュリティレベルが上がります。チェックはこのブラウザだけに保存されます。</p>
+    </header>
+    <div class="panel">
+      <div class="ring">
+        <svg viewBox="0 0 160 160"><circle class="track" cx="80" cy="80" r="66"/><circle class="val" id="ringVal" cx="80" cy="80" r="66"/></svg>
+        <div class="center"><div class="num"><span id="pct">0</span><small>%</small></div><div class="cnt" id="cnt">0 / 0</div></div>
+      </div>
+      <div>
+        <p class="levelname" id="lvName">危険</p>
+        <p class="levelmsg" id="lvMsg"></p>
+        <div class="ladder" id="ladder"></div>
+        <div class="next" id="next"></div>
+        <div class="sub" id="subScores"></div>
+      </div>
+    </div>
+    <div class="tools">
+      <button class="chip" id="f-all" aria-pressed="true">すべて</button>
+      <button class="chip" id="f-todo" aria-pressed="false">未対応だけ</button>
+      <button class="chip" id="f-hi" aria-pressed="false">重要だけ</button>
+      <span class="spacer"></span>
+      <span id="resetArea"></span>
+    </div>
+    <div id="cats"></div>
+  </div>
+
+  <!-- ===== 流出企業 ===== -->
+  <div id="view-breach" hidden>
+    <h2 class="sec">最近の流出を公表した企業</h2>
+    <p class="lead">2026年9月〜10月に公表された、10万件以上の個人情報漏えい（可能性を含む）です。使っているサービスに「使っている」を押すと、あなたがやるべきことが表示されます。</p>
+    <div class="searchrow">
+      <input class="search" id="q" type="search" placeholder="企業名・サービス名で検索（例：タイムズ、焼肉、証券）" aria-label="企業名・サービス名で検索">
+    </div>
+    <div class="tools" style="margin-top:12px">
+      <button class="chip" id="b-all" aria-pressed="true">すべて</button>
+      <button class="chip" id="b-mine" aria-pressed="false">使っているものだけ</button>
+      <button class="chip" id="b-id" aria-pressed="false">本人確認書類・口座情報</button>
+      <span class="spacer"></span>
+      <span class="meta" id="bMeta"></span>
+    </div>
+    <div class="blist" id="blist"></div>
+    <p class="note">件数は各社公表の「最大」「可能性」を含む数字で、確定値ではありません。掲載していない事案も多数あります。最新の公表は各社の公式サイトや個人情報保護委員会の情報で確認してください。データは2026年10月8日時点。</p>
+  </div>
+
+  <!-- ===== 証券口座 ===== -->
+  <div id="view-broker" hidden>
+    <h2 class="sec">証券口座の守り</h2>
+    <p class="lead">2025年春、偽サイトでIDとパスワードを盗まれた証券口座が乗っ取られ、持ち株を勝手に売られて中国株などを買わされる被害が多発しました。これを受けて各社が多要素認証を必須にし、パスキーの導入が進んでいます。</p>
+    <div class="facts">
+      <div class="fact"><b>10,422件</b><span>不正アクセス（2025年1〜5月）</span></div>
+      <div class="fact"><b>5,958件</b><span>不正取引</span></div>
+      <div class="fact"><b>5,200億円超</b><span>不正な売買の合計額</span></div>
+      <div class="fact"><b>原則50%</b><span>SBI・楽天・松井の補償方針（過失なしが条件）</span></div>
+    </div>
+    <div class="callout">
+      <h3>なぜ乗っ取られたのか</h3>
+      <ol>
+        <li>証券会社を装ったメールやSMSで偽のログイン画面へ誘導</li>
+        <li>入力したID・パスワード・認証コードがその場で犯人に転送される（リアルタイムフィッシング）</li>
+        <li>犯人が口座にログインし、持ち株を売って特定の株を買い、株価をつり上げて利益を得る</li>
+      </ol>
+      <p class="sub" style="margin-bottom:0">SMSやメールのコードは偽サイトに入力すると突破されます。<b>パスキー</b>は本物のサイトでしか動かないので、この手口に強いのが特長です。</p>
+    </div>
+
+    <div class="brokers" id="brokers"></div>
+    <div id="brokerView"></div>
+  </div>
+
+  <footer>
+    <div>点数は重要度で重み付けしています（重要 = 3点、推奨 = 2点、余裕があれば = 1点）。全体の％は「チェック」タブと、選んだ証券会社の項目の合計です。</div>
+    <div>出典：
+      <ul>
+        <li><a href="https://smartscope.blog/blog/japan-data-breach-list-tier-2026-09-10/" target="_blank" rel="noopener">日本の情報漏えい事案一覧（SmartScope）</a>、<a href="https://share.timescar.jp/news/2026/0929/1816.html" target="_blank" rel="noopener">タイムズカー公式のお知らせ</a></li>
+        <li><a href="https://rocket-boys.co.jp/security-measures-lab/securities-account-hacks-reach-500-billion-yen/" target="_blank" rel="noopener">証券口座の不正取引の集計（金融庁発表のまとめ）</a></li>
+        <li><a href="https://diamond.jp/zai/articles/-/1053757" target="_blank" rel="noopener">ダイヤモンド・ザイ：ネット証券各社のセキュリティ比較（2025年8月時点）</a></li>
+        <li><a href="https://www.rakuten-sec.co.jp/web/security/" target="_blank" rel="noopener">楽天証券 セキュリティ</a>、<a href="https://www.watch.impress.co.jp/docs/news/2058330.html" target="_blank" rel="noopener">Impress Watch：SBI証券・楽天証券がパスキー対応</a></li>
+      </ul>
+    </div>
+  </footer>
+</div>
+
+<script>
+/* ---------- データ：基本チェック ---------- */
+const DATA=[
+ {cat:"アカウントを守る",items:[
+  {id:"2fa-main",w:3,t:"メール・Apple/Googleアカウントに2段階認証",h:"全アカウントの“親”。ここが破られると他も芋づる式に乗っ取られます。SMSより認証アプリかパスキーが安全。"},
+  {id:"2fa-sns",w:3,t:"X・Instagram・LINEなどSNSに2段階認証",h:"X：設定 → セキュリティとアカウントアクセス → セキュリティ → 2要素認証。"},
+  {id:"2fa-bank",w:3,t:"銀行・決済アプリの追加認証をオン",h:"ワンタイムパスワードや生体認証を必須にする。証券口座は「証券口座の守り」タブで。"},
+  {id:"pw-unique",w:3,t:"パスワードの使い回しをやめる",h:"流出した1つのパスワードで他のサービスにも入られる“リスト型攻撃”を防ぎます。"},
+  {id:"pw-manager",w:2,t:"パスワードマネージャーを使う",h:"iCloudキーチェーン、Googleパスワードマネージャー、1Password など。長くランダムなパスワードを自動生成。"},
+  {id:"passkey",w:2,t:"対応サービスはパスキーに切り替え",h:"パスワード自体を使わないので、フィッシングや流出に強い。"},
+  {id:"backup-codes",w:2,t:"2段階認証のバックアップコードを保管",h:"機種変更や紛失時の締め出しを防ぐ。スクショではなく紙かパスワードマネージャーに。"},
+  {id:"pwned",w:2,t:"自分のメールアドレスが流出していないか確認",h:"<a href=\"https://haveibeenpwned.com/\" target=\"_blank\" rel=\"noopener\">Have I Been Pwned</a> で検索。国内の流出は「流出企業を検索」タブで。"},
+  {id:"login-alert",w:1,t:"ログイン通知・ログイン履歴をチェック",h:"見覚えのない端末があればすぐログアウトさせてパスワード変更。"}
+ ]},
+ {cat:"SNSの見せ方を絞る",items:[
+  {id:"apps",w:3,t:"連携アプリ・サードパーティ権限を見直す",h:"使っていない診断アプリなどは連携解除。X：設定 → セキュリティとアカウントアクセス → アプリとセッション。"},
+  {id:"discover",w:2,t:"電話番号・メールで見つけられる設定をオフ",h:"X：設定 → プライバシーと安全 → 見つけやすさと連絡先。"},
+  {id:"location",w:2,t:"投稿の位置情報をオフ",h:"投稿への位置情報の付与と、カメラアプリの位置情報記録を両方オフに。"},
+  {id:"photos",w:2,t:"写真の写り込みに注意する",h:"窓の外の景色、最寄り駅、制服、郵便物、瞳への反射などから住所が特定されることがあります。"},
+  {id:"dm",w:1,t:"DMを受け取る相手を制限",h:"知らない相手からのDMを止めると、詐欺リンクに触れる機会が減ります。"},
+  {id:"profile",w:1,t:"プロフィールの個人情報を減らす",h:"生年月日・学校名・勤務先など、パスワード再設定の質問に使われがちな情報は載せない。"}
+ ]},
+ {cat:"スマホ・PCを守る",items:[
+  {id:"os",w:3,t:"OSとアプリを最新にアップデート",h:"自動アップデートをオンにしておくのが楽。"},
+  {id:"lock",w:3,t:"画面ロックを6桁以上 + 生体認証に",h:"「0000」「誕生日」は避ける。"},
+  {id:"find",w:2,t:"「探す」機能をオン",h:"iPhoneは「探す」、Androidは「デバイスを探す」。紛失時に遠隔ロック・消去ができます。"},
+  {id:"notif",w:1,t:"ロック画面に通知の中身を出さない",h:"認証コードがロック画面に表示されると、盗み見だけで突破されることがあります。"},
+  {id:"sim",w:1,t:"SIM PINを設定",h:"SIMを抜かれて別端末でSMS認証を受け取られるのを防ぎます。初期PINは通信会社で確認を。"}
+ ]},
+ {cat:"お金と詐欺に備える",items:[
+  {id:"card-alert",w:3,t:"カードの利用通知をオン",h:"不正利用にすぐ気づける。カード会社のアプリで設定。"},
+  {id:"phishing",w:3,t:"SMS・メールのリンクからログインしない",h:"「荷物の不在」「アカウント停止」などは公式アプリかブックマークから確認する。"},
+  {id:"statement",w:1,t:"月1回、明細と口座残高を確認",h:"少額のテスト決済が不正利用の前ぶれのことも。"}
+ ]}
+];
+
+/* ---------- データ：流出企業（2026年） ---------- */
+const BREACH=[
+ {id:"gyazo",co:"Helpfeel",svc:"Gyazo（画像共有）",d:"2026-09-16",n:"約2,362万件",num:23620000,info:"利用者データ",cause:"画像アップロード用サーバーの脆弱性",tags:["acct"]},
+ {id:"epark",co:"EPARK",svc:"EPARK リラク＆エステ（予約）",d:"2026-09-24",n:"約2,218万レコード",num:22180000,info:"予約・会員情報",cause:"非公表",tags:["acct","contact"]},
+ {id:"kinguu",co:"物語コーポレーション",svc:"焼肉きんぐ 公式アプリ",d:"2026-10-05",n:"1,078万8,963件",num:10788963,info:"会員情報",cause:"不正アクセス（調査中）",tags:["acct","contact"]},
+ {id:"murauchi",co:"ムラウチドットコム",svc:"通販サイト",d:"2026-09-15",n:"771万6,811件",num:7716811,info:"会員・注文情報",cause:"ウェブシステムの脆弱性（報道）",tags:["acct","contact"]},
+ {id:"times",co:"パーク24",svc:"タイムズカー（カーシェア）",d:"2026-09-28",n:"約660万アカウント",num:6600000,info:"会員情報、運転免許証画像などの本人確認書類 約160万件（退会者を含む）",cause:"ウェブサイトへの不正アクセス（調査中）",tags:["acct","contact","id"],url:"https://share.timescar.jp/news/2026/0929/1816.html"},
+ {id:"mrmax",co:"ミスターマックス",svc:"公式アプリ・ネットストア",d:"2026-10-06",n:"最大173万5,154人",num:1735154,info:"会員ID、氏名、メール、電話番号（住所・カード・パスワードは対象外）",cause:"ソフトウェアの脆弱性を突いた侵入",tags:["contact"]},
+ {id:"fines",co:"ファインズ",svc:"予約サービス",d:"2026-09-25",n:"対象 153万6,322件",num:1536322,info:"予約者の氏名、電話番号、メールアドレスなど",cause:"記載なし",tags:["contact"]},
+ {id:"sakura",co:"さくらインターネット",svc:"会員・レンタルサーバー",d:"2026-09-10",n:"136万563アカウント",num:1360563,info:"販売管理システムの会員情報",cause:"非公表",tags:["acct","contact"]},
+ {id:"white",co:"ホワイトエッセンス",svc:"歯科ホワイトニング予約",d:"2026-10-05",n:"約105万アカウント",num:1050000,info:"会員・予約情報",cause:"予約サイトの脆弱性から基幹システムへ侵入",tags:["acct","contact"]},
+ {id:"infoq",co:"GMOリサーチ&AI",svc:"infoQ（アンケートモニター）",d:"2026-10-05",n:"最大94万8,498件",num:948498,info:"モニター会員情報",cause:"サイトのソフトウェアの脆弱性",tags:["acct","contact"]},
+ {id:"seicomart",co:"セコマ",svc:"セイコーマート 公式アプリ",d:"2026-09-29",n:"約57万アカウント",num:570000,info:"会員情報（可能性）",cause:"不正アクセス（調査中）",tags:["acct"]},
+ {id:"asahikasei",co:"旭化成セラピューティクス",svc:"医療従事者向け情報サイト",d:"2026-10-06",n:"最大 約51.4万人",num:514000,info:"医療従事者の氏名、施設名・住所、職種など",cause:"委託先経由のサイバー攻撃",tags:["contact"]},
+ {id:"ozmall",co:"スターツ出版",svc:"OZmall",d:"2026-10-01",n:"最大44万2,779名",num:442779,info:"会員情報（閲覧の可能性）",cause:"海外からの大量の不正アクセス",tags:["acct","contact"]},
+ {id:"leanbody",co:"LEAN BODY",svc:"オンラインフィットネス",d:"2026-09-15",n:"約44万アカウント",num:440000,info:"会員情報（退会者を含む）",cause:"社内分析ツールの脆弱性",tags:["acct","contact"]},
+ {id:"offerbox",co:"i-plug",svc:"OfferBox（就活）",d:"2026-10-05",n:"最大31万4,009人",num:314009,info:"2027・2028年卒学生の氏名、メールアドレス",cause:"設定の不備",tags:["contact"]},
+ {id:"gss",co:"デジタル庁",svc:"GSS（政府共通基盤）",d:"2026-09-11",n:"約24.6万件",num:246000,info:"利用者情報（可能性）",cause:"VPN機器の脆弱性と保守用アカウントの悪用",tags:["contact"]},
+ {id:"daiwa",co:"大和証券",svc:"委託先：スカラコミュニケーションズ",d:"2026-10-05",n:"約22万件（約11万人分）",num:220000,info:"氏名、メールアドレス、口座番号など",cause:"委託先の管理サイトへの不正ログイン",tags:["contact","bank"]},
+ {id:"coop",co:"コープやまぐち",svc:"LINE ミニアプリ",d:"2026-09-07",n:"計21万7,295件",num:217295,info:"組合員情報",cause:"調査中（外部委託先が運用）",tags:["contact"]},
+ {id:"daiki",co:"大起水産",svc:"公式アプリ",d:"2026-10-05",n:"17万4,933人",num:174933,info:"会員情報（可能性）",cause:"第三者による不正アクセス",tags:["acct"]},
+ {id:"voising",co:"VOISING",svc:"—",d:"2026-09-30",n:"約17万件",num:170000,info:"顧客情報",cause:"利用するBIツールの脆弱性",tags:["contact"]},
+ {id:"pfu",co:"PFU",svc:"PFUダイレクト本店（通販）",d:"2026-09-18",n:"最大16万9,355件",num:169355,info:"注文データ",cause:"旧ECサイト管理システムのサーバーへの不正アクセス",tags:["contact"]},
+ {id:"daiichi",co:"第一生命保険",svc:"人事システム",d:"2026-10-02",n:"約12万名",num:120000,info:"従業員・退職者の情報",cause:"人事システムへの不正アクセス",tags:["contact"]},
+ {id:"citizen",co:"シチズン時計",svc:"委託先：スカラコミュニケーションズ",d:"2026-10-06",n:"約10万人",num:100000,info:"問い合わせ情報（氏名、住所、電話番号、メールなど）",cause:"委託先サーバーへの不正アクセス",tags:["contact"]}
+];
+const TAGNAME={acct:"アカウント情報",contact:"氏名・連絡先",id:"本人確認書類",bank:"口座情報"};
+const ADVICE={
+ acct:"このサービスのパスワードを変更。同じパスワードを他で使っていたら、そちらも全部変更する",
+ contact:"この会社を名乗るメール・SMS・電話は、リンクを開かず公式アプリやサイトから確認する",
+ id:"免許証などでのなりすまし契約に注意。身に覚えのない郵便や請求が来たらすぐ相談。CIC・JICCで信用情報を開示して確認するのも有効",
+ bank:"証券会社を装ったフィッシングに注意。ログイン履歴と取引履歴を確認し、通知をオンにする"
+};
+
+/* ---------- データ：証券会社 ---------- */
+const BROKERS=[
+ {id:"rakuten",name:"楽天証券",mfa:"2025年6月1日",comp:"原則50%を補償（過失なしが条件）",
+  feats:[
+   ["パスキー認証（FIDO2）","スマホやPCの指紋・顔認証でログイン。2026年6月から順次必須化。設定後はパスワードでログインできなくなる。PC（Windows Hello / Touch ID）にも保存可能、最大10個","req"],
+   ["ログイン追加認証","パスキーが使えない場合は必須。メールに届く絵文字を選ぶ方式で、偽サイトには正しい絵文字が出ないので見分けられる","req"],
+   ["リスクベース認証","いつもと違うログインや取引を検知すると、登録電話番号に本人確認の電話","auto"],
+   ["出金時の追加認証","出金時にSMSか音声のワンタイムキー入力が必須（2025年10月26日〜）","req"],
+   ["出金先口座の限定","登録済みの本人名義の口座にしか出金できない","auto"],
+   ["ログイン通知メール","ログインがあるとメールで通知（2025年6月から自動）","auto"],
+   ["注文通知","注文の受付・訂正・取消をメールで通知。商品ごとに設定","set"],
+   ["出金先口座の変更停止","カスタマーサービスに連絡すると、出金先の変更にロック","set"],
+   ["取引・サービスの一時停止","ログインを含む全取引や個別の取引を止められる。PCサイトか24時間の自動音声ダイヤル","set"]
+  ],
+  todo:[
+   {id:"rk-passkey",w:3,t:"パスキーを設定する",h:"ログイン後のセキュリティ設定から。必須化の案内を待たずに設定できます。"},
+   {id:"rk-tradepw",w:3,t:"取引暗証番号をログインパスワードと別にする",h:"他のサービスとも使い回さない。"},
+   {id:"rk-phone",w:2,t:"登録電話番号を今使っている番号にする",h:"リスクベース認証の電話と、出金時のSMSが届かないと困ります。"},
+   {id:"rk-order",w:2,t:"注文通知をオンにする",h:"身に覚えのない注文にすぐ気づけます。"},
+   {id:"rk-lockpay",w:2,t:"出金先口座の変更停止を申し込む",h:"乗っ取られても出金先を犯人の口座に変えられなくなります。"},
+   {id:"rk-stop",w:1,t:"使わない取引（外国株・信用など）を一時停止",h:"乗っ取り被害で多かった外国株の買付を止めておける。"},
+   {id:"rk-hist",w:1,t:"ログイン履歴を確認する",h:"過去3か月分。覚えのない日時がないか見る。"}
+  ]},
+ {id:"sbi",name:"SBI証券",mfa:"2025年5月31日",comp:"原則50%を補償（過失なしが条件）",
+  feats:[
+   ["パスキー認証","顔・指紋でログイン。ユーザーネームやパスワード、デバイス認証が不要に（2025年10月25日〜）","set"],
+   ["デバイス認証","画面の認証コードを、メール内のURLから開いた画面にだけ入力する方式。リアルタイムフィッシング対策","req"],
+   ["電話番号認証","登録電話番号から指定番号に発信して認証","req"],
+   ["三段階認証","パスワード＋電話番号認証＋デバイス認証を組み合わせられる","set"],
+   ["スマホ認証（SBI証券 スマートアプリ）","FIDO準拠のアプリで認証。対象はスマホアプリと先物ツールなど","set"],
+   ["口座ロック","オンラインで口座を一時的にロックできる","set"]
+  ],
+  todo:[
+   {id:"sb-passkey",w:3,t:"パスキーを設定する",h:"ログイン後のセキュリティ設定から。"},
+   {id:"sb-code",w:3,t:"認証コードは「メール内のURLから開いた画面」でだけ入力",h:"ログイン画面とは別の画面に入力するのがSBIの仕組み。偽サイトでコードを入れない。"},
+   {id:"sb-tradepw",w:3,t:"取引パスワードをログインパスワードと別にする",h:"他のサービスとも使い回さない。"},
+   {id:"sb-three",w:2,t:"三段階認証（電話番号認証＋デバイス認証）をオン",h:"パスキーが使えない環境でのログインも固くなります。"},
+   {id:"sb-phone",w:2,t:"登録電話番号とメールアドレスを最新にする",h:"認証が届かないと自分も締め出されます。"},
+   {id:"sb-mail",w:2,t:"Eメール通知サービスで約定・入出金の通知をオン",h:"My設定 → Eメール通知サービス。"},
+   {id:"sb-lock",w:1,t:"口座ロックの手順を確認しておく",h:"怪しいと思ったらすぐ止められるように。"}
+  ]},
+ {id:"monex",name:"マネックス証券",mfa:"2025年7月4日",comp:"記載なし（公式で確認）",
+  feats:[
+   ["認証アプリ","Google Authenticator / Microsoft Authenticatorによる認証を推奨","set"],
+   ["SMS・メール認証","10分有効のコードを入力","req"],
+   ["MYログイン","いつもと違う端末・環境のログインをメール通知。オプションで秘密の質問も","set"],
+   ["パスキー認証","2025年10月から導入予定と発表（2025年8月時点）","plan"]
+  ],
+  todo:[
+   {id:"mx-app",w:3,t:"認証アプリで認証するよう設定",h:"SMS・メールよりも乗っ取られにくい方式。"},
+   {id:"mx-tradepw",w:3,t:"取引パスワードをログインパスワードと別にする",h:"他のサービスとも使い回さない。"},
+   {id:"mx-passkey",w:2,t:"パスキーに対応していれば設定",h:"対応状況は公式サイトで確認。"},
+   {id:"mx-my",w:2,t:"MYログインの秘密の質問をオン",h:"知らない端末からのログインをもう一段止めます。"},
+   {id:"mx-mail",w:1,t:"取引・入出金の通知メールを受け取る",h:"受信できるアドレスか確認。"}
+  ]},
+ {id:"matsui",name:"松井証券",mfa:"2025年7月26日",comp:"原則50%を補償（過失なしが条件）",
+  feats:[
+   ["SMS認証","3分有効のコードを入力","req"],
+   ["電話認証","携帯番号を登録していない場合のみ","req"],
+   ["パスキー認証","FIDO準拠のパスキー認証を導入予定と発表（2025年8月時点）","plan"]
+  ],
+  todo:[
+   {id:"mt-phone",w:3,t:"携帯電話番号を登録してSMS認証にする",h:"番号が古いとログインできなくなるので最新に。"},
+   {id:"mt-tradepw",w:3,t:"取引パスワードをログインパスワードと別にする",h:"他のサービスとも使い回さない。"},
+   {id:"mt-passkey",w:2,t:"パスキーに対応していれば設定",h:"対応状況は公式サイトで確認。"},
+   {id:"mt-mail",w:1,t:"取引・入出金の通知メールを受け取る",h:"受信できるアドレスか確認。"}
+  ]},
+ {id:"mufg",name:"三菱UFJ eスマート証券",sub:"旧auカブコム証券",mfa:"2025年6月16日",comp:"記載なし（公式で確認）",
+  feats:[
+   ["認証アプリのプッシュ認証","専用アプリに届く通知で「許可」を押す。認証コード入力にも対応","set"],
+   ["メール認証","登録アドレスに届く10分有効のコードを入力","req"],
+   ["リカバリーコード","メールもアプリも使えないとき、本人確認情報と登録携帯番号で発行","auto"]
+  ],
+  todo:[
+   {id:"mu-app",w:3,t:"認証アプリのプッシュ認証を設定",h:"自分がログインしていないときの通知は「拒否」。"},
+   {id:"mu-tradepw",w:3,t:"取引パスワードをログインパスワードと別にする",h:"他のサービスとも使い回さない。"},
+   {id:"mu-phone",w:2,t:"登録携帯番号とメールを最新にする",h:"リカバリーに使います。"},
+   {id:"mu-mail",w:1,t:"取引・入出金の通知メールを受け取る",h:"受信できるアドレスか確認。"}
+  ]}
+];
+const COMMON=[
+ {id:"cm-bookmark",w:3,t:"公式アプリかブックマークからだけログインする",h:"検索結果の広告や、メール・SMSのリンクからは開かない。"},
+ {id:"cm-uniq",w:3,t:"ログインパスワードを他のサービスと別にする",h:"流出企業のパスワードを使い回していると、証券口座に入られます。"}
+];
+const STLABEL={req:"必須・自動で有効",set:"自分で設定",auto:"会社側の対策",plan:"予定"};
+
+/* ---------- 状態 ---------- */
+const KEY="mamori-check-v1";
+let S={checks:{},mine:{},broker:"rakuten"};
+try{const r=JSON.parse(localStorage.getItem(KEY)||"{}");if(r.checks)S=Object.assign(S,r);else S.checks=r}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const allCore=DATA.flatMap(c=>c.items);
+const brokerItems=()=>{const b=BROKERS.find(x=>x.id===S.broker);return b?[...COMMON,...b.todo]:[]};
+const sumW=a=>a.reduce((s,i)=>s+i.w,0);
+const gotW=a=>a.reduce((s,i)=>s+(S.checks[i.id]?i.w:0),0);
+const CHECK='<svg viewBox="0 0 24 24"><path d="M5 12l5 5L19 7"/></svg>';
+const WL={3:"重要",2:"推奨",1:"余裕があれば"};
+const LEVELS=[
+ {min:0,name:"危険",color:"--danger",msg:"流出したら乗っ取られてもおかしくない状態です。まずは「重要」から。"},
+ {min:25,name:"要注意",color:"--danger",msg:"基本の一部はできています。親アカウントの守りを固めましょう。"},
+ {min:50,name:"まずまず",color:"--warn",msg:"半分を超えました。乗っ取りの多くはここまでで防げます。"},
+ {min:80,name:"堅牢",color:"--ok",msg:"かなり強い状態です。残りもやれば隙がなくなります。"},
+ {min:100,name:"完璧",color:"--great",msg:"全部できました。半年に一度、見直しに戻ってきてください。"}
+];
+const itemHTML=(i,pre="chk")=>`<li class="item"><label><input type="checkbox" id="${pre}-${i.id}" data-id="${i.id}" ${S.checks[i.id]?"checked":""}><span class="box">${CHECK}</span>
+  <span class="txt"><div class="t">${i.t}</div><div class="how">${i.h}</div></span><span class="pts ${i.w===3?"hi":""}">${WL[i.w]}</span></label></li>`;
+
+/* ---------- チェック ---------- */
+let filter="all";
+function renderCheck(){
+  const el=document.getElementById("cats");el.innerHTML="";
+  DATA.forEach(c=>{
+    const done=c.items.filter(i=>S.checks[i.id]).length;
+    const vis=c.items.filter(i=>filter==="all"||(filter==="todo"&&!S.checks[i.id])||(filter==="hi"&&i.w===3));
+    if(!vis.length)return;
+    const s=document.createElement("section");s.className="cat";
+    s.innerHTML=`<div class="cathead"><h3>${c.cat}</h3><span class="c ${done===c.items.length?"full":""}">${done} / ${c.items.length}</span></div><ul class="list">${vis.map(i=>itemHTML(i)).join("")}</ul>`;
+    el.appendChild(s);
+  });
+}
+function update(){
+  const items=[...allCore,...brokerItems()];
+  const pct=Math.round(gotW(items)/sumW(items)*100);
+  const n=items.filter(i=>S.checks[i.id]).length;
+  let li=0;LEVELS.forEach((l,k)=>{if(pct>=l.min)li=k});
+  const L=LEVELS[li];
+  document.documentElement.style.setProperty("--lvl",`var(${L.color})`);
+  document.getElementById("pct").textContent=pct;
+  document.getElementById("barPct").textContent=pct+"%";
+  document.getElementById("barFill").style.width=pct+"%";
+  document.getElementById("cnt").textContent=`${n} / ${items.length} 項目`;
+  const C=2*Math.PI*66,r=document.getElementById("ringVal");
+  r.style.strokeDasharray=C;r.style.strokeDashoffset=C*(1-pct/100);
+  document.getElementById("lvName").textContent=`レベル ${li+1}：${L.name}`;
+  document.getElementById("lvMsg").textContent=L.msg;
+  document.getElementById("ladder").innerHTML=LEVELS.map((l,k)=>`<div class="${k<=li?"on":""}">${l.name}</div>`).join("");
+  const nx=[...items].sort((a,b)=>b.w-a.w).find(i=>!S.checks[i.id]);
+  document.getElementById("next").innerHTML=nx?`次にやると効果が大きい：<b>${nx.t}</b>（+${Math.round(nx.w/sumW(items)*100)}%）`:"すべて完了しています。";
+  const b=BROKERS.find(x=>x.id===S.broker);
+  const bi=brokerItems();
+  const corePct=Math.round(gotW(allCore)/sumW(allCore)*100);
+  const minec=BREACH.filter(x=>S.mine[x.id]).length;
+  document.getElementById("subScores").innerHTML=`基本 ${corePct}%`+(b?` ・ ${b.name} ${Math.round(gotW(bi)/sumW(bi)*100)}%`:"")+(minec?` ・ <span style="color:var(--danger)">流出サービス利用 ${minec}件</span>`:"");
+  const badge=document.getElementById("mineBadge");badge.hidden=!minec;badge.textContent=minec;
+  // broker header progress
+  if(document.getElementById("view-todo").hidden)renderTodo();
+  const bp=document.getElementById("bkPct");
+  if(bp&&bi.length){const p=Math.round(gotW(bi)/sumW(bi)*100);bp.textContent=p+"%";document.getElementById("bkBar").style.width=p+"%"}
+}
+document.addEventListener("change",e=>{
+  const id=e.target.dataset.id;if(!id)return;
+  S.checks[id]=e.target.checked;save();
+  if(e.target.closest("#cats")){
+    if(filter==="todo"&&e.target.checked){setTimeout(()=>{renderCheck();update()},350)}
+    else{const fid=e.target.id;renderCheck();const el=document.getElementById(fid);el&&el.focus()}
+  }else if(e.target.closest("#todoList")){
+    setTimeout(renderTodo,450);
+  }else{renderBrokerCounts()}
+  update();
+});
+["all","todo","hi"].forEach(f=>document.getElementById("f-"+f).addEventListener("click",()=>{
+  filter=f;["all","todo","hi"].forEach(g=>document.getElementById("f-"+g).setAttribute("aria-pressed",g===f));renderCheck();
+}));
+function resetIdle(){const a=document.getElementById("resetArea");a.innerHTML='<button class="reset" id="resetBtn">チェックをすべて外す</button>';document.getElementById("resetBtn").onclick=resetAsk}
+function resetAsk(){
+  const a=document.getElementById("resetArea");
+  a.innerHTML='<span class="confirm">本当に外しますか？<button class="yes" id="rYes">外す</button><button id="rNo">やめる</button></span>';
+  document.getElementById("rYes").onclick=()=>{S.checks={};save();resetIdle();renderCheck();renderBroker();update()};
+  document.getElementById("rNo").onclick=resetIdle;
+}
+
+/* ---------- 流出企業 ---------- */
+let bf="all";
+function renderBreach(){
+  const q=document.getElementById("q").value.trim().toLowerCase();
+  const list=BREACH.filter(x=>{
+    if(bf==="mine"&&!S.mine[x.id])return false;
+    if(bf==="id"&&!x.tags.some(t=>t==="id"||t==="bank"))return false;
+    if(!q)return true;
+    return (x.co+x.svc+x.info).toLowerCase().includes(q);
+  }).sort((a,b)=>b.d.localeCompare(a.d)||b.num-a.num);
+  const el=document.getElementById("blist");
+  document.getElementById("bMeta").textContent=`${list.length} / ${BREACH.length} 件`;
+  if(!list.length){el.innerHTML=`<div class="empty">${bf==="mine"?"「使っている」にしたサービスはまだありません。":"該当する企業は見つかりませんでした。"}<br>ここにない場合も、使っているサービスからのお知らせメールは公式サイトで確認してください。</div>`;return}
+  el.innerHTML=list.map(x=>`
+   <article class="bcard ${S.mine[x.id]?"mine":""}">
+     <div class="btop"><span class="bname">${x.svc}</span><span class="bsvc">${x.co}</span><span class="bdate">${x.d.replace(/-/g,".")} 公表</span></div>
+     <div class="bcount">${x.n}</div>
+     <div class="bline"><span>流出した情報：</span>${x.info}</div>
+     <div class="bline"><span>原因：</span>${x.cause}${x.url?` ・ <a href="${x.url}" target="_blank" rel="noopener">公式のお知らせ</a>`:""}</div>
+     <div class="tags">${x.tags.map(t=>`<span class="tag">${TAGNAME[t]}</span>`).join("")}</div>
+     <button class="use" data-use="${x.id}" aria-pressed="${!!S.mine[x.id]}">${S.mine[x.id]?"使っている ✓":"使っている"}</button>
+     <div class="todo"><b>あなたがやること</b><ul>${x.tags.map(t=>`<li>${ADVICE[t]}</li>`).join("")}<li>同じメールアドレスで登録している他のサービスの2段階認証を確認する</li></ul></div>
+   </article>`).join("");
+}
+document.getElementById("blist").addEventListener("click",e=>{
+  const b=e.target.closest("[data-use]");if(!b)return;
+  const id=b.dataset.use;S.mine[id]=!S.mine[id];if(!S.mine[id])delete S.mine[id];save();renderBreach();update();
+  const nb=document.querySelector(`[data-use="${id}"]`);nb&&nb.focus();
+});
+document.getElementById("q").addEventListener("input",renderBreach);
+["all","mine","id"].forEach(f=>document.getElementById("b-"+f).addEventListener("click",()=>{
+  bf=f;["all","mine","id"].forEach(g=>document.getElementById("b-"+g).setAttribute("aria-pressed",g===f));renderBreach();
+}));
+
+/* ---------- 証券口座 ---------- */
+function renderBrokerCounts(){
+  document.querySelectorAll(".bk").forEach(btn=>{
+    const b=BROKERS.find(x=>x.id===btn.dataset.bk);if(!b)return;const it=[...COMMON,...b.todo];
+    btn.querySelector("small").textContent=Math.round(gotW(it)/sumW(it)*100)+"%";
+  });
+}
+function renderBroker(){
+  document.getElementById("brokers").innerHTML=BROKERS.map(b=>`<button class="bk" data-bk="${b.id}" aria-pressed="${S.broker===b.id}">${b.name}<small></small></button>`).join("")
+   +`<button class="bk" data-bk="" aria-pressed="${!S.broker}">使っていない</button>`;
+  renderBrokerCounts();
+  const b=BROKERS.find(x=>x.id===S.broker),v=document.getElementById("brokerView");
+  if(!b){v.innerHTML=`<p class="empty" style="margin-top:16px">証券口座を持っていない場合、全体の％には含めません。</p>`;return}
+  v.innerHTML=`
+   <div class="bkhead"><h3>${b.name}</h3>${b.sub?`<span class="bsvc">${b.sub}</span>`:""}<span class="bsvc">多要素認証の必須化：${b.mfa}</span><span class="bsvc">補償：${b.comp}</span></div>
+   <section class="cat"><div class="cathead"><h3>${b.name}のチェックリスト</h3><span class="c" id="bkPct"></span></div>
+    <div class="minibar"><i id="bkBar"></i></div>
+    <ul class="list">${[...COMMON,...b.todo].map(i=>itemHTML(i,"bk")).join("")}</ul></section>
+   <section class="cat"><div class="cathead"><h3>${b.name}のセキュリティ機能</h3></div>
+   <div class="tablewrap"><table><thead><tr><th>機能</th><th>何をしてくれるか</th><th>状態</th></tr></thead><tbody>
+    ${b.feats.map(f=>`<tr><td class="f">${f[0]}</td><td>${f[1]}</td><td><span class="st ${f[2]}">${STLABEL[f[2]]}</span></td></tr>`).join("")}
+   </tbody></table></div>
+   <p class="note">「自分で設定」の機能は、設定しないと守ってくれません。仕様は変わることがあるので、最新は${b.name}の公式サイトで確認してください。</p></section>
+   <section class="cat"><div class="cathead"><h3>乗っ取られたかもと思ったら</h3></div>
+    <ol class="steps">
+     <li><b>すぐに取引を止める</b>：${b.name}のサイトかサポート窓口で口座をロック・取引停止にする</li>
+     <li><b>パスワードを変える</b>：ログインと取引のパスワード両方。使い回し先も</li>
+     <li><b>証券会社に連絡</b>：身に覚えのない取引の日時と内容を伝える。補償の相談もここから</li>
+     <li><b>警察に相談</b>：都道府県警察のサイバー犯罪相談窓口へ。相談したことを記録しておく</li>
+     <li><b>証拠を残す</b>：取引履歴、ログイン通知メール、届いたフィッシングメールを保存</li>
+    </ol></section>`;
+}
+document.getElementById("brokers").addEventListener("click",e=>{
+  const b=e.target.closest("[data-bk]");if(!b)return;
+  S.broker=b.dataset.bk;save();renderBroker();update();
+  const nb=document.querySelector(`[data-bk="${S.broker}"]`);nb&&nb.focus();
+});
+
+/* ---------- やること ---------- */
+const BTASK={
+ acct:x=>({t:`${x.svc}のパスワードを変更（同じパスワードの他サービスも）`,w:3}),
+ contact:x=>({t:`${x.co}を名乗るメール・SMS・電話に注意する`,w:2}),
+ id:x=>({t:`信用情報を開示して、身に覚えのない契約がないか確認（${x.svc}）`,w:3}),
+ bank:x=>({t:`${x.co}のログイン履歴と取引履歴を確認し、通知をオン`,w:3})
+};
+function breachTasks(){
+  return BREACH.filter(x=>S.mine[x.id]).flatMap(x=>x.tags.map(tg=>{const b=BTASK[tg](x);return {id:`bt-${x.id}-${tg}`,w:b.w,t:b.t,h:ADVICE[tg],src:"流出対応"}}));
+}
+function renderTodo(){
+  const b=BROKERS.find(x=>x.id===S.broker);
+  const src=[
+   ...breachTasks(),
+   ...brokerItems().map(i=>({...i,src:b.name})),
+   ...allCore.map(i=>({...i,src:DATA.find(c=>c.items.includes(i)).cat}))
+  ];
+  const open=src.filter(i=>!S.checks[i.id]);
+  const done=src.length-open.length;
+  document.getElementById("todoFacts").innerHTML=
+   `<div class="fact"><b>${open.length}</b><span>残りのやること</span></div>
+    <div class="fact"><b>${open.filter(i=>i.w===3).length}</b><span>うち「重要」</span></div>
+    <div class="fact"><b>${done}</b><span>完了</span></div>`;
+  const el=document.getElementById("todoList");
+  if(!open.length){el.innerHTML=`<div class="empty" style="margin-top:20px">やることはすべて完了しています。新しい流出のニュースが出たら「流出企業を検索」で確認しましょう。</div>`;return}
+  const groups=[[3,"まず今日やる（重要）"],[2,"今週中にやる（推奨）"],[1,"余裕があるときに"]];
+  el.innerHTML=groups.map(([w,label])=>{
+    const g=open.filter(i=>i.w===w).sort((a,b)=>(b.src==="流出対応")-(a.src==="流出対応"));
+    if(!g.length)return"";
+    return `<section class="cat"><div class="cathead"><h3>${label}</h3><span class="c">${g.length}件</span></div><ul class="list">${
+      g.map(i=>itemHTML({...i,h:`<span class="srcl">${i.src}</span>${i.h}`},"td")).join("")}</ul></section>`;
+  }).join("");
+  const badge=document.getElementById("todoBadge");badge.hidden=!open.filter(i=>i.w===3).length;badge.textContent=open.filter(i=>i.w===3).length;
+}
+
+/* ---------- タブ ---------- */
+const VIEWS=["todo","check","breach","broker"];
+const RENDER={todo:renderTodo,check:renderCheck,breach:renderBreach,broker:renderBroker};
+function show(v){
+  VIEWS.forEach(x=>{document.getElementById("view-"+x).hidden=x!==v;document.getElementById("tab-"+x).setAttribute("aria-selected",x===v)});
+  try{RENDER[v]();update()}catch(e){console.error(e)}
+  try{localStorage.setItem(KEY+"-tab",v)}catch(e){}
+  window.scrollTo({top:0});
+}
+VIEWS.forEach(v=>document.getElementById("tab-"+v).addEventListener("click",()=>show(v)));
+
+resetIdle();renderCheck();renderBreach();renderBroker();update();
+let start=(location.hash||"").slice(1);
+if(!VIEWS.includes(start)){try{start=localStorage.getItem(KEY+"-tab")}catch(e){}}
+if(VIEWS.includes(start))show(start);
+</script>
+
+</body>
+</html>
