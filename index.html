@@ -307,6 +307,56 @@ mark.flag{background:none;color:inherit;border-radius:3px;transition:background 
 .ct .tg{position:absolute;left:80%;top:-3px;bottom:-3px;border-left:2px dashed var(--ink)}
 .cv{font-family:var(--mono);font-weight:700;text-align:right;font-variant-numeric:tabular-nums}
 @media (max-width:440px){.cbar{grid-template-columns:minmax(0,6em) 1fr 3em}}
+
+/* hero (first view, shared by all tabs) */
+.hero{position:relative;overflow:hidden;color:#fff;background:radial-gradient(60% 80% at 85% 10%,rgba(87,184,255,.35),transparent 60%),radial-gradient(50% 60% at 0% 100%,rgba(43,200,228,.22),transparent 60%),linear-gradient(135deg,#000060 0%,#0017C1 62%,#0055AD 100%);padding-inline:16px;padding-block:28px 22px;
+  --ink:#fff;--muted:#C5D7FB;--line:rgba(255,255,255,.2);--surface:rgba(255,255,255,.08);--warn:#FF8D44;--danger:#FF7171;--ok:#51B883;--accent:#99F2FF;--hlv:#FF7171}
+.hbg{position:absolute;right:-60px;top:-30px;width:420px;height:auto;fill:none;stroke:rgba(255,255,255,.08);stroke-width:1.2;pointer-events:none}
+.heroin{position:relative;max-width:860px;margin:0 auto;display:grid;grid-template-columns:1fr auto;grid-template-areas:"t r" "x r";column-gap:32px;align-items:center}
+.htitle{grid-area:t}.hring{grid-area:r;display:grid;justify-items:center;gap:8px}.hrest{grid-area:x}
+.heyebrow{font-size:12px;letter-spacing:.16em;font-weight:700;color:#99F2FF}
+.hero h1{font-family:var(--display);font-weight:900;font-size:clamp(30px,6vw,46px);line-height:1.15;margin:.15em 0 .3em;color:#fff;text-wrap:balance}
+.hlead{margin:0;color:#C5D7FB;max-width:34em;font-size:14.5px}
+.ring.big{width:250px;height:250px}
+.hero .ring svg{overflow:visible}
+.hero .ring .track{stroke:rgba(255,255,255,.14);stroke-width:13}
+.hero .ring .val{stroke:var(--hlv);stroke-width:13;filter:drop-shadow(0 0 8px var(--hlv))}
+.hero .ring .target{stroke:#fff;stroke-width:3}
+.hero .ring .num{font-size:64px;color:#fff;letter-spacing:-.02em}
+.hero .ring .num small{font-size:24px;color:#C5D7FB}
+.hlab{font-size:12px;font-weight:700;letter-spacing:.12em;color:#C5D7FB;margin-bottom:2px}
+.hero .ring .cnt{color:#C5D7FB}
+.tgtl{font-size:12px;color:#C5D7FB;display:flex;align-items:center;gap:6px}
+.tgtl i{width:12px;height:3px;background:#fff;border-radius:2px}
+.hlevel{margin-top:18px}
+.hchip{display:inline-block;font-family:var(--display);font-weight:900;font-size:22px;color:#000060;background:var(--hlv);border-radius:999px;padding:4px 16px;transition:background .5s}
+.hmsg{margin:10px 0 14px;color:#E8F1FE;font-size:14.5px}
+.hero .ladder{max-width:420px}
+.hero .ladder div{border-top-color:rgba(255,255,255,.18);color:#C5D7FB}
+.hero .ladder div.on{border-top-color:var(--hlv);color:#fff}
+.hnext{font:inherit;text-align:left;display:grid;grid-template-columns:1fr auto;align-items:center;gap:2px 12px;width:100%;max-width:440px;margin-top:16px;background:#fff;color:#0B1A33;border:none;border-radius:12px;padding:12px 16px;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,40,.35);transition:transform .15s}
+.hnext:hover{transform:translateY(-2px)}
+.hnext span{grid-column:1;font-size:11.5px;font-weight:700;color:#0017C1;letter-spacing:.06em}
+.hnext b{grid-column:1;font-size:15px}
+.hnext em{grid-column:2;grid-row:1/3;font-style:normal;font-family:var(--mono);font-weight:700;color:#fff;background:#0017C1;border-radius:999px;padding:4px 10px;font-size:13px;white-space:nowrap}
+.hbtns{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:12px}
+.hshare{margin-top:0;background:transparent;color:#fff;border-color:rgba(255,255,255,.6)}
+.hshare:hover{background:rgba(255,255,255,.12)}
+.hnote{font-size:12px;color:#C5D7FB}
+.hnext:focus-visible,.hshare:focus-visible{outline:2px solid #99F2FF;outline-offset:3px}
+.kpiwrap{display:block;margin-top:22px}
+.hero .kpis{margin-top:0}
+.hero .kpi{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.16);backdrop-filter:blur(6px)}
+.hero .kpi .kl,.hero .kpi .ks,.hero .kpi b small{color:#C5D7FB}
+.hero .kpi b{color:#fff}
+.hero .kpi.warnk b{color:#FF8D44}.hero .kpi.dangerk b{color:#FF7171}
+@media (max-width:720px){
+  .heroin{grid-template-columns:1fr;grid-template-areas:"t" "r" "x";text-align:left}
+  .hring{margin-top:14px}.ring.big{width:190px;height:190px}.hero .ring .num{font-size:52px}.hlevel{margin-top:12px}
+  .hlevel{text-align:center}.hmsg{text-align:center}.hero .ladder{margin-inline:auto}.hnext{margin-inline:auto}.hbtns{justify-content:center}
+  .hbg{width:300px;right:-90px;top:-20px}
+}
+@media (prefers-reduced-motion:reduce){.hnext{transition:none}}
 footer{margin-top:40px;font-size:12px;color:var(--muted);display:grid;gap:6px}
 footer ul{margin:0;padding-left:1.2em}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -315,6 +365,31 @@ footer ul{margin:0;padding-left:1.2em}
 <body>
 
 
+<section class="hero" aria-label="あなたの守りレベル">
+  <svg class="hbg" viewBox="0 0 100 116" aria-hidden="true"><path d="M50 4 L92 20 V54 C92 82 74 100 50 112 C26 100 8 82 8 54 V20 Z"/></svg>
+  <div class="heroin">
+    <div class="htitle">
+      <div class="heyebrow">個人情報流出 対策まとめ</div>
+      <h1>守りのチェックリスト</h1>
+      <p class="hlead">散らばった対策をひとつに。できたものにチェックするほど、あなたの守りレベルが上がります。</p>
+    </div>
+    <div class="hring">
+      <div class="ring big">
+        <svg viewBox="0 0 160 160"><circle class="track" cx="80" cy="80" r="66"/><circle class="val" id="ringVal" cx="80" cy="80" r="66"/><line class="target" x1="97.3" y1="26.7" x2="103.5" y2="7.7"/></svg>
+        <div class="center"><div class="hlab">守りレベル</div><div class="num"><span id="pct">0</span><small>%</small></div><div class="cnt" id="cnt">0 / 0</div></div>
+      </div>
+      <div class="tgtl"><i></i>目標 80%（堅牢）</div>
+    </div>
+    <div class="hrest">
+      <div class="hlevel"><span class="hchip" id="lvName"></span></div>
+      <p class="hmsg" id="lvMsg"></p>
+      <div class="ladder" id="ladder"></div>
+      <button class="hnext" id="next"></button>
+      <div class="hbtns"><button class="sharebtn hshare" id="shareLevel">結果をシェア</button><span class="hnote">チェックはこのブラウザだけに保存されます</span></div>
+    </div>
+  </div>
+  <div class="heroin kpiwrap"><div class="kpis" id="kpis"></div></div>
+</section>
 <div class="wrap">
   <div class="topbar">
     <div class="barrow" aria-hidden="true"><div class="bar"><i id="barFill"></i></div><span class="pct" id="barPct">0%</span></div>
@@ -337,25 +412,6 @@ footer ul{margin:0;padding-left:1.2em}
 
   <!-- ===== チェック ===== -->
   <div id="view-check">
-    <header>
-      <div class="eyebrow">個人情報流出 対策まとめ</div>
-      <h1>守りのチェックリスト</h1>
-      <p class="lead">Xのスレッドに散らばっていた対策を、やるべき順にまとめました。できたものにチェックを入れると、あなたのセキュリティレベルが上がります。チェックはこのブラウザだけに保存されます。</p>
-    </header>
-    <div class="panel">
-      <div class="ring">
-        <svg viewBox="0 0 160 160"><circle class="track" cx="80" cy="80" r="66"/><circle class="val" id="ringVal" cx="80" cy="80" r="66"/><line class="target" x1="97.3" y1="26.7" x2="103.5" y2="7.7"/></svg>
-        <div class="center"><div class="num"><span id="pct">0</span><small>%</small></div><div class="cnt" id="cnt">0 / 0</div><div class="tgtl">目標 80%</div></div>
-      </div>
-      <div>
-        <p class="levelname" id="lvName">危険</p>
-        <p class="levelmsg" id="lvMsg"></p>
-        <div class="ladder" id="ladder"></div>
-        <div class="next" id="next"></div>
-        <button class="sharebtn" id="shareLevel">結果をシェアする</button>
-      </div>
-    </div>
-    <div class="kpis" id="kpis"></div>
     <section class="card">
       <div class="cardh"><h3 class="cardt">カテゴリ別の達成度</h3><span class="legend"><i></i>目標 80%</span></div>
       <p class="cardsub">単位：%（重要度で重み付け）。0%から100%で表示。</p>
@@ -647,6 +703,15 @@ function renderCheck(){
     el.appendChild(s);
   });
 }
+let shownPct=0,countRaf=0;
+function countTo(t){
+  const el=document.getElementById("pct");cancelAnimationFrame(countRaf);
+  const reduce=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if(reduce||Math.abs(t-shownPct)<1){shownPct=t;el.textContent=t;return}
+  const from=shownPct,st=performance.now(),d=700;
+  const step=now=>{const k=Math.min(1,(now-st)/d),e=1-Math.pow(1-k,3);shownPct=Math.round(from+(t-from)*e);el.textContent=shownPct;if(k<1)countRaf=requestAnimationFrame(step)};
+  countRaf=requestAnimationFrame(step);
+}
 function update(){
   const items=[...allCore,...brokerItems()];
   const pct=Math.round(gotW(items)/sumW(items)*100);
@@ -655,7 +720,9 @@ function update(){
   if(typeof checkLevelUp==="function")checkLevelUp(li);
   const L=LEVELS[li];
   document.documentElement.style.setProperty("--lvl",`var(${L.color})`);
-  document.getElementById("pct").textContent=pct;
+  const HLV=["#FF7171","#FF8D44","#57B8FF","#2BC8E4","#99F2FF"];
+  document.querySelector(".hero").style.setProperty("--hlv",HLV[li]);
+  countTo(pct);
   document.getElementById("barPct").textContent=pct+"%";
   document.getElementById("barFill").style.width=pct+"%";
   document.getElementById("cnt").textContent=`${n} / ${items.length} 項目`;
@@ -665,7 +732,8 @@ function update(){
   document.getElementById("lvMsg").textContent=L.msg;
   document.getElementById("ladder").innerHTML=LEVELS.map((l,k)=>`<div class="${k<=li?"on":""}">${l.name}</div>`).join("");
   const nx=[...items].sort((a,b)=>b.w-a.w).find(i=>!S.checks[i.id]);
-  document.getElementById("next").innerHTML=nx?`次にやると効果が大きい：<b>${nx.t}</b>（+${Math.round(nx.w/sumW(items)*100)}%）`:"すべて完了しています。";
+  const nb=document.getElementById("next");nb.dataset.has=nx?"1":"";
+  nb.innerHTML=nx?`<span>次にやると効果が大きい</span><b>${nx.t}</b><em>+${Math.round(nx.w/sumW(items)*100)}% ›</em>`:`<span>すべて完了</span><b>半年に一度、見直しに来てください</b><em>100%</em>`;
   const b=BROKERS.find(x=>x.id===S.broker);
   const bi=brokerItems();
   const corePct=Math.round(gotW(allCore)/sumW(allCore)*100);
@@ -959,6 +1027,7 @@ document.getElementById("mClose").onclick=closeModal;
 document.getElementById("modal").addEventListener("click",e=>{if(e.target.id==="modal")closeModal()});
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal()});
 document.getElementById("shareLevel").onclick=()=>openShare("level");
+document.getElementById("next").onclick=()=>{show("todo");window.scrollTo({top:document.querySelector(".hero").offsetHeight,behavior:"smooth"})};
 function checkLevelUp(li){
   if(S.maxLv==null){S.maxLv=li;save();return}
   if(li>S.maxLv){S.maxLv=li;save();setTimeout(()=>openShare("level",true),450)}
@@ -1078,7 +1147,7 @@ function show(v){
   VIEWS.forEach(x=>{document.getElementById("view-"+x).hidden=x!==v;document.getElementById("tab-"+x).setAttribute("aria-selected",x===v)});
   try{RENDER[v]();update()}catch(e){console.error(e)}
   try{localStorage.setItem(KEY+"-tab",v)}catch(e){}
-  window.scrollTo({top:0});
+  const hh=document.querySelector(".hero").offsetHeight;if(window.scrollY>hh)window.scrollTo({top:hh});
 }
 VIEWS.forEach(v=>document.getElementById("tab-"+v).addEventListener("click",()=>show(v)));
 
