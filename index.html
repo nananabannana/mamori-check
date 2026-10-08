@@ -3,6 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta property="og:title" content="守りのチェックリスト">
+<meta property="og:description" content="個人情報流出への対策をチェックしてセキュリティレベルを上げよう。流出企業の検索、証券口座の設定、フィッシング見破りクイズつき。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://mamori-check.vercel.app/">
+<meta property="og:image" content="https://mamori-check.vercel.app/og.png">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="description" content="個人情報流出への対策チェック、流出企業の検索、証券口座のセキュリティ設定をまとめたダッシュボード">
 <title>守りのチェックリスト</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -40,8 +46,9 @@ a{color:var(--accent)}
 .bar i{display:block;height:100%;width:0;background:var(--lvl);transition:width .5s ease,background .5s}
 .pct{font-family:var(--mono);font-weight:700;font-size:13px;min-width:4ch;text-align:right;font-variant-numeric:tabular-nums}
 .tabs{display:flex;gap:4px;margin-top:10px;border-bottom:1px solid var(--line);overflow-x:auto}
-.tab{font:inherit;font-weight:700;font-size:14px;background:none;border:none;color:var(--muted);padding:8px 12px 10px;border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap}
+.tab{flex:1 1 auto;font:inherit;font-weight:700;font-size:14px;background:none;border:none;color:var(--muted);padding:8px 10px 10px;border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap}
 .tab[aria-selected="true"]{color:var(--ink);border-color:var(--ink)}
+@media (max-width:440px){.tabs{gap:0}.tab{font-size:12.5px;padding:8px 4px 10px}.tab .badge{font-size:10px;padding:0 5px;margin-left:2px}}
 .tab .badge{font-family:var(--mono);font-size:11px;background:var(--danger);color:var(--surface);border-radius:999px;padding:1px 6px;margin-left:4px}
 
 header{padding-block:18px 4px}
@@ -155,6 +162,82 @@ td.f{font-weight:700;white-space:nowrap}
 .srcl{display:inline-block;font-size:11px;font-weight:700;color:var(--accent);background:var(--accent-soft);border-radius:4px;padding:0 6px;margin-right:6px}
 .steps{margin:12px 0 0;padding-left:1.4em;display:grid;gap:8px;font-size:14px}
 .steps b{color:var(--danger)}
+
+/* quiz */
+.qcard{margin-top:18px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;display:grid;gap:14px}
+.qhead{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--muted)}
+.qprog{display:flex;gap:4px}
+.qprog i{width:16px;height:6px;border-radius:3px;background:var(--line)}
+.qprog i.ok{background:var(--ok)}.qprog i.ng{background:var(--danger)}.qprog i.cur{background:var(--ink)}
+.ctx{font-size:13px;background:var(--accent-soft);border-radius:8px;padding:8px 12px}
+.mock{border-radius:12px;background:var(--bg);padding:14px;font-size:14px;overflow-wrap:anywhere}
+.sms .from{font-size:12px;color:var(--muted);margin-bottom:6px;text-align:center}
+.sms .bub{background:var(--surface);border:1px solid var(--line);border-radius:16px 16px 16px 4px;padding:10px 14px;max-width:88%}
+.mail .mh{font-size:12px;color:var(--muted);border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:8px}
+.mail .mh b{color:var(--ink);font-size:15px;display:block;margin-top:2px}
+.mail .fakebtn{display:inline-block;margin-top:8px;background:var(--accent);color:var(--surface);border-radius:6px;padding:6px 14px;font-weight:700;font-size:13px}
+.browser{padding:0;overflow:hidden;border:1px solid var(--line)}
+.browser .addr{display:flex;gap:8px;align-items:center;background:var(--surface);padding:8px 12px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:13px}
+.browser .addr .lk{color:var(--muted);font-family:var(--body)}
+.browser .pg{padding:18px;display:grid;gap:8px;justify-items:center}
+.browser .logo{font-family:var(--display);font-size:18px;color:var(--accent)}
+.browser .fld{width:min(240px,100%);height:28px;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+.browser .fb{width:min(240px,100%);height:30px;border-radius:6px;background:var(--accent);opacity:.8}
+.call{text-align:center}
+.call .who{font-size:12px;color:var(--muted)}
+.call .num{font-family:var(--mono);font-size:18px;font-weight:700;margin:2px 0 10px}
+.call .say{text-align:left;background:var(--surface);border-radius:10px;padding:10px 14px;border:1px solid var(--line)}
+.dm .acct{display:flex;gap:8px;align-items:center;margin-bottom:8px;font-size:13px}
+.dm .av{width:28px;height:28px;border-radius:50%;background:var(--warn)}
+.dm .bub{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 14px}
+mark.flag{background:none;color:inherit;border-radius:3px;transition:background .3s,box-shadow .3s}
+.reveal mark.flag{background:var(--danger-soft);box-shadow:0 0 0 2px var(--danger)}
+.reveal mark.flag::after{content:attr(data-n);font-family:var(--mono);font-size:10px;font-weight:700;background:var(--danger);color:var(--surface);border-radius:999px;padding:0 5px;margin-left:3px;vertical-align:super}
+.reveal.good mark.flag{background:var(--accent-soft);box-shadow:0 0 0 2px var(--ok)}
+.reveal.good mark.flag::after{background:var(--ok)}
+.qq{font-weight:700;text-align:center}
+.qbtns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.qbtn{font:inherit;font-weight:700;font-size:16px;padding:14px;border-radius:12px;border:2px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;transition:transform .1s}
+.qbtn:active{transform:scale(.97)}
+.qbtn.real{border-color:var(--ok)}.qbtn.fake{border-color:var(--danger)}
+.qbtn:disabled{opacity:.45;cursor:default}
+.qbtn.picked{opacity:1;color:var(--surface)}
+.qbtn.real.picked{background:var(--ok)}.qbtn.fake.picked{background:var(--danger)}
+.verdict{font-family:var(--display);font-size:22px;display:flex;align-items:center;gap:10px}
+.verdict.ok{color:var(--ok)}.verdict.ng{color:var(--danger)}
+.verdict{animation:pop .35s cubic-bezier(.2,1.6,.4,1)}
+@keyframes pop{from{transform:scale(.6);opacity:0}to{transform:none;opacity:1}}
+.exp{font-size:14px}.exp ol{margin:6px 0 0;padding-left:1.3em;display:grid;gap:4px}
+.qnext{font:inherit;font-weight:700;justify-self:end;background:var(--ink);color:var(--bg);border:none;border-radius:999px;padding:10px 22px;cursor:pointer}
+.qresult{text-align:center;display:grid;gap:10px;justify-items:center;padding:12px 0}
+.qresult .big{font-family:var(--mono);font-weight:700;font-size:56px;line-height:1}
+.qresult .rank{font-family:var(--display);font-size:26px;color:var(--accent)}
+.qrow{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.sharebtn{font:inherit;font-size:14px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:6px;margin-top:12px;border:2px solid var(--ink);background:var(--surface);color:var(--ink);border-radius:999px;padding:8px 18px;cursor:pointer;text-decoration:none}
+.sharebtn.primary{background:var(--ink);color:var(--bg)}
+.sharebtn:focus-visible,.qbtn:focus-visible,.qnext:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+/* modal */
+.modal{position:fixed;inset:0;z-index:20;background:rgba(8,16,14,.62);display:grid;place-items:center;padding:16px;animation:fade .2s}
+@keyframes fade{from{opacity:0}}
+.modalbox{position:relative;background:var(--surface);border-radius:18px;padding:22px 18px 18px;width:min(520px,100%);max-height:calc(100% - 32px);overflow:auto;text-align:center;animation:pop .4s cubic-bezier(.2,1.4,.4,1)}
+.mclose{position:absolute;top:8px;right:10px;font-size:24px;background:none;border:none;color:var(--muted);cursor:pointer;width:40px;height:40px}
+.mtitle{font-family:var(--display);font-weight:400;font-size:24px;margin:6px 0 4px;color:var(--lvl)}
+.mmsg{color:var(--muted);margin:0 0 12px;font-size:14px}
+.cardimg{width:100%;border-radius:10px;border:1px solid var(--line);display:block}
+.mactions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.mnote{font-size:12px;color:var(--muted);margin:10px 0 0}
+.lvup{display:grid;justify-items:center}
+.shieldwrap{position:relative;width:110px;height:126px}
+.shield{width:100%;height:100%;overflow:visible}
+.shield path:first-child{fill:var(--lvl);animation:grow .7s cubic-bezier(.2,1.5,.4,1) both}
+.shield .tick{fill:none;stroke:var(--surface);stroke-width:9;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:70;stroke-dashoffset:70;animation:draw .5s .45s ease forwards}
+@keyframes grow{from{transform:scale(.2) rotate(-12deg);transform-origin:50% 60%;opacity:0}to{transform:none;opacity:1}}
+@keyframes draw{to{stroke-dashoffset:0}}
+.spark{position:absolute;left:50%;top:50%;width:8px;height:8px;border-radius:50%;background:var(--lvl);opacity:0;animation:burst .8s .3s ease-out}
+.s1{--dx:-70px;--dy:-40px}.s2{--dx:70px;--dy:-44px}.s3{--dx:-78px;--dy:30px}.s4{--dx:76px;--dy:34px}.s5{--dx:-20px;--dy:-80px}.s6{--dx:24px;--dy:-78px}
+@keyframes burst{0%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(.3)}}
+.lvupl{font-family:var(--mono);font-weight:700;letter-spacing:.3em;font-size:13px;color:var(--lvl);margin-top:6px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}.shield .tick{stroke-dashoffset:0}}
 footer{margin-top:40px;font-size:12px;color:var(--muted);display:grid;gap:6px}
 footer ul{margin:0;padding-left:1.2em}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -169,6 +252,7 @@ footer ul{margin:0;padding-left:1.2em}
     <div class="tabs" role="tablist">
       <button class="tab" role="tab" id="tab-todo" aria-selected="false">やること<span class="badge" id="todoBadge" hidden></span></button>
       <button class="tab" role="tab" id="tab-check" aria-selected="true">チェック</button>
+      <button class="tab" role="tab" id="tab-quiz" aria-selected="false">クイズ</button>
       <button class="tab" role="tab" id="tab-breach" aria-selected="false">流出企業<span class="badge" id="mineBadge" hidden></span></button>
       <button class="tab" role="tab" id="tab-broker" aria-selected="false">証券口座</button>
     </div>
@@ -199,6 +283,7 @@ footer ul{margin:0;padding-left:1.2em}
         <p class="levelmsg" id="lvMsg"></p>
         <div class="ladder" id="ladder"></div>
         <div class="next" id="next"></div>
+        <button class="sharebtn" id="shareLevel">結果をシェアする</button>
         <div class="sub" id="subScores"></div>
       </div>
     </div>
@@ -210,6 +295,13 @@ footer ul{margin:0;padding-left:1.2em}
       <span id="resetArea"></span>
     </div>
     <div id="cats"></div>
+  </div>
+
+  <!-- ===== クイズ ===== -->
+  <div id="view-quiz" hidden>
+    <h2 class="sec">フィッシング見破りクイズ</h2>
+    <p class="lead">本物そっくりの偽SMSや偽サイトは、見るべき場所を知っていれば見破れます。全9問、「本物」か「偽物」かをタップして答えてください。登場する会社名やURLはすべて架空です。</p>
+    <div id="quiz"></div>
   </div>
 
   <!-- ===== 流出企業 ===== -->
@@ -252,6 +344,24 @@ footer ul{margin:0;padding-left:1.2em}
 
     <div class="brokers" id="brokers"></div>
     <div id="brokerView"></div>
+  </div>
+
+  <div class="modal" id="modal" hidden>
+    <div class="modalbox" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <button class="mclose" id="mClose" aria-label="閉じる">×</button>
+      <div id="lvup" class="lvup" hidden>
+        <div class="shieldwrap"><svg viewBox="0 0 100 116" class="shield"><path d="M50 4 L92 20 V54 C92 82 74 100 50 112 C26 100 8 82 8 54 V20 Z"/><path class="tick" d="M30 58 L45 73 L72 42"/></svg><span class="spark s1"></span><span class="spark s2"></span><span class="spark s3"></span><span class="spark s4"></span><span class="spark s5"></span><span class="spark s6"></span></div>
+        <div class="lvupl">LEVEL UP</div>
+      </div>
+      <h3 id="modalTitle" class="mtitle"></h3>
+      <p id="modalMsg" class="mmsg"></p>
+      <img id="cardImg" class="cardimg" alt="シェア用の結果カード">
+      <div class="mactions">
+        <button class="sharebtn primary" id="mShare">画像をシェア</button>
+        <a class="sharebtn" id="mX" target="_blank" rel="noopener">Xにポスト</a>
+      </div>
+      <p class="mnote" id="mNote">画像を長押し（PCは右クリック）で保存して、ポストに添付できます。</p>
+    </div>
   </div>
 
   <footer>
@@ -462,6 +572,7 @@ function update(){
   const pct=Math.round(gotW(items)/sumW(items)*100);
   const n=items.filter(i=>S.checks[i.id]).length;
   let li=0;LEVELS.forEach((l,k)=>{if(pct>=l.min)li=k});
+  if(typeof checkLevelUp==="function")checkLevelUp(li);
   const L=LEVELS[li];
   document.documentElement.style.setProperty("--lvl",`var(${L.color})`);
   document.getElementById("pct").textContent=pct;
@@ -615,9 +726,158 @@ function renderTodo(){
   const badge=document.getElementById("todoBadge");badge.hidden=!open.filter(i=>i.w===3).length;badge.textContent=open.filter(i=>i.w===3).length;
 }
 
+/* ---------- クイズ ---------- */
+const F=(n,t)=>`<mark class="flag" data-n="${n}">${t}</mark>`;
+const QUIZ=[
+ {type:"sms",from:"+81 70-4826-1937",body:`ヤマネコ運輸よりお届けにあがりましたが、不在のため持ち帰りました。下記よりご確認ください。<br>${F(2,"https://yamaneko-unyu.top/xk3")}`,fromFlag:1,ans:false,
+  exp:["個人の携帯番号から届いている。企業の通知なら会社名で届くことが多い","URLの末尾が「.top」。運送会社の公式ドメインではない"],tip:"宅配業者がSMSのURLで不在通知を送ることはまずありません。確認は公式アプリか伝票の番号で。"},
+ {type:"mail",from:`みどり証券 &lt;${F(1,"info@midori-sec.co.jp.acc-verify.com")}&gt;`,subj:"【重要】お取引を一時制限しました",body:`お客様の口座で不審な取引を検知したため、お取引を一時制限しました。${F(2,"24時間以内")}に本人確認を行わない場合、${F(2,"口座が凍結されます")}。<br>${F(3,'<span class="fakebtn">本人確認はこちら</span>')}`,ans:false,
+  exp:["送信元アドレスの本当のドメインは末尾の「acc-verify.com」。「co.jp」は途中にあるだけ","「24時間以内」「凍結」で焦らせるのは典型的な手口","メールのボタンからログインさせようとしている"],tip:"証券会社からの「制限」「凍結」メールは、リンクを押さずに公式アプリかブックマークから確認しましょう。"},
+ {type:"browser",ctx:"ブックマークから開いたログイン画面",url:`https://${F(1,"www.midori-sec.co.jp")}/login`,ans:true,
+  exp:["ドメインが「midori-sec.co.jp」で終わり、その後ろが「/」で区切られている"],tip:"自分で登録したブックマークや公式アプリから開くのが一番安全です。"},
+ {type:"sms",from:"みどり証券",ctx:"いま自分でログインしようとしたら届いた",body:`みどり証券 認証コード：482915<br>このコードは誰にも教えないでください。${F(1,"（リンクなし）")}`,ans:true,
+  exp:["リンクがなく、自分がログインした直後に届いている"],tip:"逆に、ログインしていないのに認証コードが届いたら、パスワードが漏れているサインです。すぐパスワードを変えましょう。"},
+ {type:"browser",ctx:"検索結果の一番上の広告から開いた",url:`https://www.midori-sec.${F(1,"co.jp-login.net")}/`,ans:false,
+  exp:["本当のドメインは末尾の「jp-login.net」。「co.jp」の直後が「/」ではなく「-」"],tip:"検索広告に偽サイトが出ることがあります。ログインはブックマークから。"},
+ {type:"browser",ctx:"メールのリンクから開いたログイン画面",url:`https://www.${F(1,"rnidori")}-sec.co.jp/login`,ans:false,
+  exp:["「m」ではなく「r」と「n」が並んでいる。小さい画面ではほぼ見分けがつかない"],tip:"1文字違いのドメインは目で見抜くのが難しいので、そもそもメールのリンクから開かないのが正解です。"},
+ {type:"dm",from:F(1,"@present_campaign_jp"),body:`おめでとうございます！フォロワー限定キャンペーンに当選しました。賞品の発送先を${F(2,"以下のフォームに入力")}してください。`,ans:false,
+  exp:["公式マークのない、知らないアカウントから届いている","住所や電話番号などの個人情報を入力させようとしている"],tip:"当選DMは個人情報を集める手口の定番です。公式アカウントの投稿で当選発表があるか確認を。"},
+ {type:"call",who:"着信",num:"03-XXXX-XXXX",body:`${F(1,"警察庁サイバー対策課")}の者です。あなたの口座が犯罪に使われています。確認のため、${F(2,"ログインIDと暗証番号を教えてください")}。`,ans:false,
+  exp:["警察や公的機関を名乗る電話は詐欺の常套手段","警察がIDや暗証番号を聞くことは絶対にない"],tip:"一度電話を切って、自分で調べた警察署の番号（または #9110）にかけ直しましょう。"},
+ {type:"mail",ctx:"さっき新しいスマホでログインした",from:`みどり銀行 &lt;${F(1,"no-reply@midori-bank.co.jp")}&gt;`,subj:"ログインのお知らせ",body:`10月8日 14:02 に新しい端末からログインがありました。お心当たりがない場合は、${F(2,"公式アプリから")}パスワードを変更してください。`,ans:true,
+  exp:["送信元ドメインが正しく「co.jp」で終わっている","リンクを押させず、公式アプリでの確認をすすめている"],tip:"自分の操作と時刻が合っていれば本物の通知です。心当たりがなければ公式アプリからパスワード変更を。"}
+];
+const RANKS=[[9,"見破りマスター","完璧です。どんな偽メッセージにもだまされません。"],[7,"かなり鋭い","ほとんど見破れています。見落としたポイントだけ確認しましょう。"],[4,"あと一歩","半分は見破れました。URLの末尾を見るクセをつけると一気に上がります。"],[0,"要注意","今のままだとだまされる可能性があります。解説を読んでもう一度挑戦してみてください。"]];
+const rankOf=n=>RANKS.find(r=>n>=r[0]);
+let Q={i:0,res:[],started:false};
+function mockHTML(q){
+  if(q.type==="sms")return `<div class="mock sms"><div class="from">${q.fromFlag?F(q.fromFlag,q.from):q.from}</div><div class="bub">${q.body}</div></div>`;
+  if(q.type==="mail")return `<div class="mock mail"><div class="mh">差出人：${q.from}<b>${q.subj}</b></div>${q.body}</div>`;
+  if(q.type==="browser")return `<div class="mock browser"><div class="addr"><span class="lk">🔒</span><span>${q.url}</span></div><div class="pg"><div class="logo">${q.url.includes("bank")?"みどり銀行":"みどり証券"}</div><div class="fld"></div><div class="fld"></div><div class="fb"></div></div></div>`;
+  if(q.type==="dm")return `<div class="mock dm"><div class="acct"><span class="av"></span><span>${q.from}</span></div><div class="bub">${q.body}</div></div>`;
+  return `<div class="mock call"><div class="who">${q.who}</div><div class="num">${q.num}</div><div class="say">${q.body}</div></div>`;
+}
+function renderQuiz(){
+  const el=document.getElementById("quiz");
+  if(!Q.started){
+    const best=S.quizBest;
+    el.innerHTML=`<div class="qcard qresult"><div class="rank">全${QUIZ.length}問</div><p class="lead" style="margin:0">SMS・メール・ログイン画面・電話。あなたはどこまで見破れる？</p>${best!=null?`<div class="sub">前回のベスト：${best} / ${QUIZ.length}問（${rankOf(best)[1]}）</div>`:""}<button class="qnext" id="qStart" style="justify-self:center">スタート</button></div>`;
+    document.getElementById("qStart").onclick=()=>{Q={i:0,res:[],started:true};renderQuiz()};return;
+  }
+  if(Q.i>=QUIZ.length){
+    const n=Q.res.filter(Boolean).length,r=rankOf(n);
+    if(S.quizBest==null||n>S.quizBest){S.quizBest=n;save()}
+    el.innerHTML=`<div class="qcard qresult"><div class="qprog">${Q.res.map(x=>`<i class="${x?"ok":"ng"}"></i>`).join("")}</div><div class="big">${n}<small style="font-size:22px"> / ${QUIZ.length}</small></div><div class="rank">${r[1]}</div><p class="lead" style="margin:0">${r[2]}</p>
+     <div class="qrow"><button class="sharebtn primary" id="qShare">結果をシェアする</button><button class="sharebtn" id="qRetry">もう一度</button></div></div>`;
+    document.getElementById("qShare").onclick=()=>openShare("quiz");
+    document.getElementById("qRetry").onclick=()=>{Q={i:0,res:[],started:true};renderQuiz()};
+    return;
+  }
+  const q=QUIZ[Q.i];
+  el.innerHTML=`<div class="qcard"><div class="qhead"><span>第${Q.i+1}問 / ${QUIZ.length}</span><span class="qprog">${QUIZ.map((_,k)=>`<i class="${k<Q.i?(Q.res[k]?"ok":"ng"):k===Q.i?"cur":""}"></i>`).join("")}</span></div>
+   ${q.ctx?`<div class="ctx">状況：${q.ctx}</div>`:""}<div id="qMock">${mockHTML(q)}</div>
+   <div class="qq">これは本物？偽物？</div>
+   <div class="qbtns"><button class="qbtn real" data-a="1">本物</button><button class="qbtn fake" data-a="0">偽物</button></div>
+   <div id="qAfter"></div></div>`;
+  el.querySelectorAll(".qbtn").forEach(b=>b.onclick=()=>answer(b));
+}
+function answer(btn){
+  const q=QUIZ[Q.i],pick=btn.dataset.a==="1",ok=pick===q.ans;
+  Q.res.push(ok);
+  document.querySelectorAll(".qbtn").forEach(b=>b.disabled=true);btn.classList.add("picked");
+  const m=document.getElementById("qMock");m.classList.add("reveal");if(q.ans)m.classList.add("good");
+  document.getElementById("qAfter").innerHTML=`<div class="verdict ${ok?"ok":"ng"}">${ok?"正解！":"ざんねん…"}<span style="font-family:var(--body);font-size:15px;color:var(--muted)">これは${q.ans?"本物":"偽物"}</span></div>
+   <div class="exp"><b>${q.ans?"安心できるポイント":"見破るポイント"}</b><ol>${q.exp.map(x=>`<li>${x}</li>`).join("")}</ol><p class="sub">${q.tip}</p></div>
+   <button class="qnext" id="qNext">${Q.i+1<QUIZ.length?"次の問題へ":"結果を見る"}</button>`;
+  const nb=document.getElementById("qNext");nb.focus({preventScroll:true});
+  nb.onclick=()=>{Q.i++;renderQuiz();document.getElementById("view-quiz").scrollIntoView({block:"start"})};
+}
+
+/* ---------- レベルアップ & シェアカード ---------- */
+const SITE="https://mamori-check.vercel.app/";
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+function scoreNow(){
+  const items=[...allCore,...brokerItems()];const pct=Math.round(gotW(items)/sumW(items)*100);
+  let li=0;LEVELS.forEach((l,k)=>{if(pct>=l.min)li=k});return {pct,li};
+}
+async function drawCard(kind){
+  try{await document.fonts.ready}catch(e){}
+  const c=document.createElement("canvas");c.width=1200;c.height=630;const x=c.getContext("2d");
+  const LVC=["#e2593f","#e2593f","#f0b54a","#5cc985","#4fc3a8"];
+  const g=x.createLinearGradient(0,0,1200,630);g.addColorStop(0,"#0c1f1b");g.addColorStop(1,"#163a32");x.fillStyle=g;x.fillRect(0,0,1200,630);
+  x.strokeStyle="rgba(255,255,255,.05)";x.lineWidth=1;for(let i=0;i<1200;i+=40){x.beginPath();x.moveTo(i,0);x.lineTo(i,630);x.stroke()}for(let j=0;j<630;j+=40){x.beginPath();x.moveTo(0,j);x.lineTo(1200,j);x.stroke()}
+  const shield=(cx,cy,s,col,val)=>{x.save();x.translate(cx-50*s,cy-58*s);x.scale(s,s);const p=new Path2D("M50 4 L92 20 V54 C92 82 74 100 50 112 C26 100 8 82 8 54 V20 Z");
+    x.fillStyle="rgba(255,255,255,.08)";x.fill(p);x.save();x.clip(p);x.fillStyle=col;x.fillRect(0,116-116*val,100,116*val);x.restore();x.lineWidth=4/s*1.2;x.strokeStyle=col;x.stroke(p);x.restore()};
+  const FD='"Dela Gothic One","Hiragino Sans",sans-serif',FB='"Zen Kaku Gothic New","Hiragino Sans",sans-serif',FM='"JetBrains Mono",monospace';
+  x.textBaseline="alphabetic";
+  if(kind==="quiz"){
+    const n=S.quizBest??0,last=Q.res.length===QUIZ.length?Q.res.filter(Boolean).length:n,r=rankOf(last),col=last>=7?"#4fc3a8":last>=4?"#f0b54a":"#e2593f";
+    shield(240,300,2.6,col,last/QUIZ.length);
+    x.fillStyle="#fff";x.font=`700 72px ${FM}`;x.textAlign="center";x.fillText(`${last}/${QUIZ.length}`,240,325);
+    x.textAlign="left";x.fillStyle="#9fb8b1";x.font=`700 30px ${FB}`;x.fillText("フィッシング見破りクイズ",470,180);
+    x.fillStyle=col;x.font=`80px ${FD}`;x.fillText(r[1],466,290);
+    x.fillStyle="#dfeae6";x.font=`500 30px ${FB}`;x.fillText(`偽SMS・偽サイトを ${last}問 見破りました`,470,355);
+    QUIZ.forEach((_,k)=>{x.fillStyle=k<last?col:"rgba(255,255,255,.15)";if(x.roundRect){x.beginPath();x.roundRect(470+k*62,395,50,14,7);x.fill()}else x.fillRect(470+k*62,395,50,14)});
+  }else{
+    const {pct,li}=scoreNow(),L=LEVELS[li],col=LVC[li];
+    shield(240,300,2.6,col,pct/100);
+    x.fillStyle="#fff";x.font=`700 76px ${FM}`;x.textAlign="center";x.fillText(pct+"%",240,325);
+    x.textAlign="left";x.fillStyle="#9fb8b1";x.font=`700 30px ${FB}`;x.fillText("わたしの守りレベル",470,180);
+    x.fillStyle=col;x.font=`92px ${FD}`;x.fillText(`Lv.${li+1} ${L.name}`,466,295);
+    LEVELS.forEach((l,k)=>{x.fillStyle=k<=li?col:"rgba(255,255,255,.15)";x.fillRect(470+k*130,340,118,10);x.fillStyle=k<=li?"#fff":"#6f8a83";x.font=`700 22px ${FB}`;x.fillText(l.name,470+k*130,385)});
+    const items=[...allCore,...brokerItems()];
+    x.fillStyle="#dfeae6";x.font=`500 28px ${FB}`;x.fillText(`個人情報流出対策 ${items.filter(i=>S.checks[i.id]).length} / ${items.length} 項目クリア`,470,450);
+  }
+  x.fillStyle="rgba(255,255,255,.1)";x.fillRect(0,540,1200,90);
+  x.fillStyle="#fff";x.font=`34px ${FD}`;x.textAlign="left";x.fillText("守りのチェックリスト",60,598);
+  x.fillStyle="#9fb8b1";x.font=`500 26px ${FM}`;x.textAlign="right";x.fillText("mamori-check.vercel.app",1140,596);
+  return c;
+}
+let cardCanvas=null,shareKind="level";
+async function openShare(kind,levelUp){
+  shareKind=kind;
+  const {pct,li}=scoreNow();
+  document.getElementById("lvup").hidden=!levelUp;
+  let title,msg;
+  if(kind==="quiz"){const n=Q.res.length===QUIZ.length?Q.res.filter(Boolean).length:(S.quizBest??0);title=`${n} / ${QUIZ.length}問 正解`;msg=`ランク「${rankOf(n)[1]}」。結果カードをシェアして友だちにも挑戦してもらおう。`}
+  else if(levelUp){title=`レベル ${li+1}：${LEVELS[li].name}`;msg=LEVELS[li].msg}
+  else{title=`いまの守りレベル：${LEVELS[li].name}`;msg=`${pct}% クリア。結果カードをシェアできます。`}
+  document.getElementById("modalTitle").textContent=title;document.getElementById("modalMsg").textContent=msg;
+  const img=document.getElementById("cardImg");img.removeAttribute("src");
+  document.getElementById("mX").href="https://x.com/intent/post?text="+encodeURIComponent(shareText())+"&url="+encodeURIComponent(SITE);
+  const m=document.getElementById("modal");m.hidden=false;document.getElementById("mClose").focus();
+  try{cardCanvas=await drawCard(kind);img.src=cardCanvas.toDataURL("image/png")}catch(e){cardCanvas=null;console.error(e)}
+}
+function shareText(){
+  if(shareKind==="quiz"){const n=Q.res.length===QUIZ.length?Q.res.filter(Boolean).length:(S.quizBest??0);return `フィッシング見破りクイズ ${n}/${QUIZ.length}問正解、ランク「${rankOf(n)[1]}」でした。偽SMS・偽サイト、あなたは見破れる？ #守りのチェックリスト`}
+  const {pct,li}=scoreNow();return `わたしの守りレベルは「${LEVELS[li].name}」（${pct}%）でした。個人情報流出の対策、まとめてチェックできる #守りのチェックリスト`;
+}
+document.getElementById("mShare").onclick=async()=>{
+  const note=document.getElementById("mNote");
+  if(!cardCanvas)return;
+  try{
+    const blob=await new Promise(r=>cardCanvas.toBlob(r,"image/png"));
+    const file=new File([blob],"mamori-check.png",{type:"image/png"});
+    if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],text:shareText()+" "+SITE});return}
+    const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="mamori-check.png";document.body.appendChild(a);a.click();a.remove();
+    note.textContent="画像を保存しました。「Xにポスト」から添付してください。";
+  }catch(e){if(e&&e.name!=="AbortError")note.textContent="画像を長押し（PCは右クリック）で保存して、ポストに添付できます。"}
+};
+function closeModal(){document.getElementById("modal").hidden=true}
+document.getElementById("mClose").onclick=closeModal;
+document.getElementById("modal").addEventListener("click",e=>{if(e.target.id==="modal")closeModal()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal()});
+document.getElementById("shareLevel").onclick=()=>openShare("level");
+function checkLevelUp(li){
+  if(S.maxLv==null){S.maxLv=li;save();return}
+  if(li>S.maxLv){S.maxLv=li;save();setTimeout(()=>openShare("level",true),450)}
+  else if(li<S.maxLv){S.maxLv=li;save()}
+}
+
 /* ---------- タブ ---------- */
-const VIEWS=["todo","check","breach","broker"];
-const RENDER={todo:renderTodo,check:renderCheck,breach:renderBreach,broker:renderBroker};
+const VIEWS=["todo","check","quiz","breach","broker"];
+const RENDER={todo:renderTodo,check:renderCheck,quiz:renderQuiz,breach:renderBreach,broker:renderBroker};
 function show(v){
   VIEWS.forEach(x=>{document.getElementById("view-"+x).hidden=x!==v;document.getElementById("tab-"+x).setAttribute("aria-selected",x===v)});
   try{RENDER[v]();update()}catch(e){console.error(e)}
@@ -626,7 +886,7 @@ function show(v){
 }
 VIEWS.forEach(v=>document.getElementById("tab-"+v).addEventListener("click",()=>show(v)));
 
-resetIdle();renderCheck();renderBreach();renderBroker();update();
+resetIdle();renderCheck();renderQuiz();renderBreach();renderBroker();update();
 let start=(location.hash||"").slice(1);
 if(!VIEWS.includes(start)){try{start=localStorage.getItem(KEY+"-tab")}catch(e){}}
 if(VIEWS.includes(start))show(start);
