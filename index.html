@@ -238,6 +238,42 @@ mark.flag{background:none;color:inherit;border-radius:3px;transition:background 
 @keyframes burst{0%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(.3)}}
 .lvupl{font-family:var(--mono);font-weight:700;letter-spacing:.3em;font-size:13px;color:var(--lvl);margin-top:6px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important}.shield .tick{stroke-dashoffset:0}}
+
+/* SOS */
+.sosfab{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:15;font:inherit;font-weight:700;font-size:14px;background:var(--danger);color:var(--surface);border:none;border-radius:999px;padding:12px 18px;box-shadow:0 6px 20px rgba(0,0,0,.25);cursor:pointer;display:flex;align-items:center;gap:8px}
+.sosfab .dot{width:10px;height:10px;border-radius:50%;background:var(--surface);animation:beat 1.6s infinite}
+@keyframes beat{0%,100%{opacity:1}50%{opacity:.3}}
+.sosfab:focus-visible,.sosopt:focus-visible,.sosck:focus-visible,.sosnav:focus-visible,.soslink:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{padding-bottom:96px}
+.sos{position:fixed;inset:0;z-index:30;background:var(--bg);display:flex;flex-direction:column;animation:fade .2s}
+.soshead{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:calc(10px + env(safe-area-inset-top,0px)) 16px 10px;background:var(--danger);color:var(--surface)}
+.sostitle{font-family:var(--display);font-size:17px}
+.sosnav{font:inherit;font-weight:700;font-size:14px;background:none;border:none;color:var(--surface);padding:6px 4px;cursor:pointer;min-width:60px}
+.sosnav:last-child{text-align:right}
+.sosbody{flex:1;overflow-y:auto;padding:20px 16px calc(32px + env(safe-area-inset-bottom,0px));max-width:640px;width:100%;margin:0 auto}
+.soscalm{color:var(--muted);font-size:14px;margin:0 0 6px}
+.sosq{font-family:var(--display);font-weight:400;font-size:22px;margin:4px 0 14px;text-wrap:balance}
+.sosopts{display:grid;gap:10px}
+.sosopt{font:inherit;font-weight:700;font-size:15px;text-align:left;display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--surface);color:var(--ink);border:2px solid var(--line);border-radius:12px;padding:14px 16px;cursor:pointer}
+.sosopt span{font-size:22px;color:var(--muted)}
+.sosopt:active{border-color:var(--danger)}
+.sosprog{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:13px;color:var(--muted)}
+.sosprog .minibar{flex:1;margin:0}
+.sossteps{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:8px;counter-reset:s}
+.sossteps li{display:grid;grid-template-columns:36px 1fr;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.sossteps li.now{border:2px solid var(--danger)}
+.sossteps li.done .sost{color:var(--muted);text-decoration:line-through}
+.sosck{width:32px;height:32px;border-radius:50%;border:2px solid var(--muted);background:none;display:grid;place-content:center;cursor:pointer;padding:0}
+.sosck svg{width:16px;height:16px;stroke:var(--surface);stroke-width:3;fill:none;opacity:0}
+.sosck[aria-pressed="true"]{background:var(--ok);border-color:var(--ok)}
+.sosck[aria-pressed="true"] svg{opacity:1}
+.sost{font-weight:700}
+.nowl{display:inline-block;font-size:11px;background:var(--danger);color:var(--surface);border-radius:4px;padding:0 6px;margin-right:6px;vertical-align:2px}
+.soslink{font:inherit;font-size:13px;font-weight:700;background:none;border:none;color:var(--accent);padding:4px 0;cursor:pointer;text-align:left}
+.sosdone{background:var(--accent-soft);border-radius:10px;padding:12px 14px;font-weight:700;margin-top:14px}
+.sosc{margin-top:20px;font-size:14px;background:var(--surface);border:1px dashed var(--line);border-radius:12px;padding:12px 14px}
+.sosc ul{margin:4px 0 0;padding-left:1.2em}
+.sosc a[href^="tel"]{font-family:var(--mono);font-weight:700}
 footer{margin-top:40px;font-size:12px;color:var(--muted);display:grid;gap:6px}
 footer ul{margin:0;padding-left:1.2em}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -344,6 +380,12 @@ footer ul{margin:0;padding-left:1.2em}
 
     <div class="brokers" id="brokers"></div>
     <div id="brokerView"></div>
+  </div>
+
+  <button class="sosfab" id="sosBtn"><span class="dot" aria-hidden="true"></span>乗っ取られたかも？</button>
+  <div class="sos" id="sos" hidden role="dialog" aria-modal="true" aria-label="乗っ取り緊急ナビ">
+    <div class="soshead"><button class="sosnav" id="sosBack">‹ 戻る</button><span class="sostitle">乗っ取り緊急ナビ</span><button class="sosnav" id="sosClose">閉じる</button></div>
+    <div class="sosbody" id="sosBody"></div>
   </div>
 
   <div class="modal" id="modal" hidden>
@@ -875,6 +917,112 @@ function checkLevelUp(li){
   else if(li<S.maxLv){S.maxLv=li;save()}
 }
 
+/* ---------- 乗っ取り緊急ナビ ---------- */
+const L=(href,t)=>`<a href="${href}" target="_blank" rel="noopener">${t}</a>`;
+const SOS={
+ start:{q:"何が起きましたか？",opts:[
+  ["SNSアカウント（X・Instagram・LINEなど）","sns"],["メール / Apple・Googleアカウント","main"],["証券口座・ネット銀行","money"],
+  ["クレジットカードの不正利用","card"],["偽サイトにパスワードなどを入れてしまった","phish"],["スマホをなくした・盗まれた","lost"]]},
+ sns:{q:"まだそのアカウントにログインできますか？",opts:[["ログインできる","sns_in"],["ログインできない（パスワードを変えられた）","sns_out"]]},
+ main:{q:"まだそのアカウントにログインできますか？",opts:[["ログインできる","main_in"],["ログインできない","main_out"]]},
+ money:{q:"今どんな状況ですか？",opts:[["身に覚えのない取引・出金がある","money_tx"],["不審なログイン通知が来た（取引はない）","money_login"]]},
+ phish:{q:"何を入力してしまいましたか？",opts:[["SNSやメールのID・パスワード","phish_pw"],["クレジットカード番号","card"],["証券口座・銀行のログイン情報","money_tx"]]},
+ sns_in:{title:"SNSアカウントを取り戻す（ログインできる場合）",steps:[
+  ["パスワードをすぐ変更する","他のサービスと違う、長いパスワードに。"],
+  ["知らない端末をログアウトさせる","X：設定 → セキュリティとアカウントアクセス → アプリとセッション → セッション。"],
+  ["2段階認証をオンにする","SMSより認証アプリかパスキーが安全。"],
+  ["連携アプリを見直す","知らないアプリの連携を解除する。"],
+  ["登録メール・電話番号を確認","書き換えられていたら元に戻す。"],
+  ["乗っ取り中の投稿・DMを消して周りに知らせる","「乗っ取られていました。届いたDMのリンクは開かないで」と投稿する。"],
+  ["同じパスワードの他サービスも変更","使い回していたサービスはすべて。"]]},
+ sns_out:{title:"SNSアカウントを取り戻す（ログインできない場合）",steps:[
+  ["公式の復旧手続きをする",`X：${L("https://help.x.com/ja/forms/account-access/regain-access","アカウント復旧フォーム")}、Instagram：${L("https://www.instagram.com/hacked/","instagram.com/hacked")}、LINE：アプリのヘルプセンターから問い合わせ。`],
+  ["「メールアドレスが変更されました」通知を探す","登録メールに届いていれば、変更を取り消せる場合があります。"],
+  ["メールアカウント自体が無事か確認","メールにも入れない場合は、先にメールを取り戻します。",{to:"main",label:"メール / Apple・Googleのナビへ"}],
+  ["家族・友だちに別の方法で連絡","「私になりすましたDMに注意して」とLINEや電話で伝える。"],
+  ["同じパスワードの他サービスを変更","特にメール・銀行・証券口座を優先。"],
+  ["取り戻せたら、ログインできる場合の手順へ","",{to:"sns_in"}]]},
+ main_in:{title:"メール / Apple・Googleアカウントを守る",steps:[
+  ["パスワードをすぐ変更する","ここが「全アカウントの親」です。最優先。"],
+  ["ログイン中の端末を確認","Google：アカウント → セキュリティ → お使いのデバイス。Apple：設定 → 自分の名前 → デバイス一覧。知らない端末を削除。"],
+  ["2段階認証・パスキーをオン","バックアップコードも保管する。"],
+  ["メールの転送設定とフィルタを確認","犯人がメールを自分に転送する設定を仕込むことがあります。知らない転送先は削除。"],
+  ["予備のメール・電話番号を確認","書き換えられていたら元に戻す。"],
+  ["このメールで登録している重要サービスを確認","銀行・証券・通販のパスワードも順に変更。"]]},
+ main_out:{title:"メール / Apple・Googleアカウントを取り戻す",steps:[
+  ["公式の復旧手続きをする",`Google：${L("https://accounts.google.com/signin/recovery","アカウント復旧ページ")}、Apple：${L("https://iforgot.apple.com/","iforgot.apple.com")}。それ以外はメール会社のサポートへ。`],
+  ["別の端末から重要サービスのパスワードを変更","犯人はこのメールでパスワード再設定ができます。銀行・証券・通販を先に。"],
+  ["証券口座・銀行に連絡して取引を止める","不安なら一時停止をお願いする。",{to:"money_tx"}],
+  ["家族・友だちに連絡","あなたのメールから届く連絡に注意してもらう。"],
+  ["取り戻せたら、ログインできる場合の手順へ","",{to:"main_in"}]]},
+ money_tx:{title:"証券口座・銀行の不正利用",steps:[
+  ["すぐに取引・出金を止める","証券会社のサイトや自動音声ダイヤルで口座ロック・取引停止に。楽天証券は24時間の自動音声、SBI証券はオンラインでロックできます。"],
+  ["証券会社・銀行の窓口に電話","番号は公式サイトやキャッシュカードで確認。メールやSMSに書かれた番号は使わない。"],
+  ["パスワードと取引暗証番号を変更","可能ならパスキーを設定。"],
+  ["取引履歴・入出金履歴を保存","スクリーンショットと日時のメモ。届いた偽メールも消さずに残す。"],
+  ["警察に相談","#9110（警察相談専用電話）か、都道府県警察のサイバー犯罪相談窓口へ。相談した日時と担当者を記録。"],
+  ["補償について確認","SBI・楽天・松井は原則50%を補償すると発表しています（過失がないことが条件）。"]]},
+ money_login:{title:"不審なログイン通知が来た",steps:[
+  ["公式アプリかブックマークからログイン","通知メールのリンクは使わない。"],
+  ["パスワードと取引暗証番号を変更","他のサービスとは別のものに。"],
+  ["ログイン履歴と取引履歴を確認","知らない取引があれば、すぐに不正利用の手順へ。",{to:"money_tx"}],
+  ["パスキー・多要素認証を設定","「証券口座」タブのチェックリストも確認。"],
+  ["出金先口座の変更停止を申し込む","乗っ取られても出金先を変えられなくなります。"],
+  ["不安なら取引を一時停止","使わない取引（外国株など）だけ止めることもできます。"]]},
+ card:{title:"クレジットカードの不正利用",steps:[
+  ["カード会社に電話して利用を止める","カード裏面の紛失・盗難窓口へ。多くは24時間対応です。"],
+  ["身に覚えのない請求を伝える","不正利用の補償の手続きを相談する。"],
+  ["カードを再発行する","番号が変わります。"],
+  ["カードを登録しているサービスを更新","公共料金・サブスク・通販など。"],
+  ["警察に相談","カード会社に被害届の受理番号を聞かれることがあります。"]]},
+ phish_pw:{title:"偽サイトにID・パスワードを入れてしまった",steps:[
+  ["そのサービスのパスワードをすぐ変更","公式アプリかブックマークから開いて変更する。"],
+  ["ログイン中の端末を確認してログアウト","認証コードまで入れた場合、すでにログインされている可能性があります。"],
+  ["同じパスワードの他サービスも変更","使い回しは全部。"],
+  ["2段階認証・パスキーをオン","次から同じ手口が効かなくなります。"],
+  ["偽サイトを報告する",`URLとメールをフィッシング対策協議会（info@antiphishing.jp）へ。`]]},
+ lost:{title:"スマホをなくした・盗まれた",steps:[
+  ["「探す」で場所を確認し、紛失モードに",`iPhone：${L("https://www.icloud.com/find","iCloud.com/find")}、Android：${L("https://www.google.com/android/find","google.com/android/find")}。`],
+  ["携帯会社に連絡して回線を止める","SIMを悪用したSMS認証の突破を防ぎます。"],
+  ["決済アプリ・銀行アプリを止める","各社の窓口に連絡。"],
+  ["主要アカウントからその端末をログアウト","Google・Apple・SNSのデバイス一覧から削除。"],
+  ["警察に遺失届を出す","交番か警察署で。盗難なら被害届。"],
+  ["見つからなければ遠隔でデータを消去","「探す」から実行できます。"]]}
+};
+const SOSCONTACT=`<div class="sosc"><b>相談先</b><ul>
+ <li>警察相談専用電話：<a href="tel:#9110">#9110</a>（命の危険・事件なら 110）</li>
+ <li>消費者ホットライン：<a href="tel:188">188</a></li>
+ <li>${L("https://www.npa.go.jp/bureau/cyber/soudan.html","警察庁 サイバー事案に関する相談窓口")}</li></ul></div>`;
+let sosStack=["start"];
+function openSos(){sosStack=["start"];renderSos();document.getElementById("sos").hidden=false;document.body.style.overflow="hidden";document.getElementById("sosClose").focus()}
+function closeSos(){document.getElementById("sos").hidden=true;document.body.style.overflow=""}
+function sosGo(to){sosStack.push(to);renderSos();document.getElementById("sosBody").scrollTop=0}
+function renderSos(){
+  const id=sosStack[sosStack.length-1],n=SOS[id],el=document.getElementById("sosBody");
+  document.getElementById("sosBack").style.visibility=sosStack.length>1?"visible":"hidden";
+  if(n.q){
+    el.innerHTML=`<p class="soscalm">落ち着いて大丈夫です。質問に答えると、やることを順番に案内します。</p><h3 class="sosq">${n.q}</h3>
+     <div class="sosopts">${n.opts.map(([l,to])=>`<button class="sosopt" data-to="${to}">${l}<span aria-hidden="true">›</span></button>`).join("")}</div>${SOSCONTACT}`;
+  }else{
+    const ck=k=>S.checks["sos-"+id+"-"+k];
+    const done=n.steps.filter((_,k)=>ck(k)).length;
+    el.innerHTML=`<h3 class="sosq">${n.title}</h3><p class="soscalm">上から順にやれば大丈夫です。終わったらタップしてチェック。</p>
+     <div class="sosprog"><div class="minibar"><i style="width:${Math.round(done/n.steps.length*100)}%"></i></div><span>${done} / ${n.steps.length}</span></div>
+     <ol class="sossteps">${n.steps.map(([t,h,x],k)=>`<li class="${ck(k)?"done":""} ${k===0&&!ck(0)?"now":""}">
+       <button class="sosck" data-k="${k}" aria-pressed="${!!ck(k)}" aria-label="${t}を完了にする">${CHECK}</button>
+       <div><div class="sost">${k===0&&!ck(0)?'<span class="nowl">今すぐ</span>':""}${t}</div>${h?`<div class="how">${h}</div>`:""}${x&&x.to?`<button class="soslink" data-to="${x.to}">${x.label||SOS[x.to].title||"案内を見る"} ›</button>`:""}</div></li>`).join("")}</ol>
+     ${done===n.steps.length?`<p class="sosdone">すべて完了しました。おつかれさまでした。落ち着いたら「チェック」タブで予防策も確認しておきましょう。</p>`:""}${SOSCONTACT}`;
+  }
+}
+document.getElementById("sosBody").addEventListener("click",e=>{
+  const go=e.target.closest("[data-to]");if(go){sosGo(go.dataset.to);return}
+  const c=e.target.closest(".sosck");if(c){const id=sosStack[sosStack.length-1],key="sos-"+id+"-"+c.dataset.k;S.checks[key]=!S.checks[key];if(!S.checks[key])delete S.checks[key];save();renderSos();const nb=document.querySelector(`.sosck[data-k="${c.dataset.k}"]`);nb&&nb.focus()}
+});
+document.getElementById("sosBtn").onclick=openSos;
+document.getElementById("sosClose").onclick=closeSos;
+document.getElementById("sosBack").onclick=()=>{if(sosStack.length>1){sosStack.pop();renderSos()}};
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!document.getElementById("sos").hidden)closeSos()});
+
 /* ---------- タブ ---------- */
 const VIEWS=["todo","check","quiz","breach","broker"];
 const RENDER={todo:renderTodo,check:renderCheck,quiz:renderQuiz,breach:renderBreach,broker:renderBroker};
@@ -890,6 +1038,7 @@ resetIdle();renderCheck();renderQuiz();renderBreach();renderBroker();update();
 let start=(location.hash||"").slice(1);
 if(!VIEWS.includes(start)){try{start=localStorage.getItem(KEY+"-tab")}catch(e){}}
 if(VIEWS.includes(start))show(start);
+if(location.hash==="#sos")openSos();
 </script>
 
 </body>
